@@ -6,7 +6,7 @@ import { terser } from 'rollup-plugin-terser'
 export default [{
   input: 'src/external.js',
   output: {
-    dir: 'dist',
+    dir: '.',
     format: 'esm',
     compact: true
   },
@@ -27,7 +27,7 @@ export default [{
   input: 'src/qocode.js',
   external: ['./external.js'],
   output: {
-    dir: 'dist',
+    dir: '.',
     format: 'esm'
   },
   plugins: [
