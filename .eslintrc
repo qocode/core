@@ -1,0 +1,18 @@
+{
+  "extends": "@nodutilus",
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": true,
+    "node": false
+  },
+  "rules": {
+    "jsdoc/require-param": "off",
+    "jsdoc/require-returns": "off"
+  },
+  "ignorePatterns": [
+    "dist/"
+  ]
+}
