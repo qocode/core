@@ -8,6 +8,7 @@
     "external.js",
     "qocode.js"
   ],
+  "main": "qocode.js",
   "dependencies": {
     "@zxing/library": "^0.15.2",
     "pako": "^1.0.10",
