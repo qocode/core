@@ -5,10 +5,10 @@
   "license": "Unlicense",
   "repository": "github:qocode/qocode",
   "files": [
-    "external.js",
-    "qocode.js"
+    "api.js",
+    "external.js"
   ],
-  "main": "qocode.js",
+  "main": "api.js",
   "dependencies": {
     "@zxing/library": "^0.15.2",
     "pako": "^1.0.10",

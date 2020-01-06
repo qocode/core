@@ -24,7 +24,7 @@ export default [{
     terser()
   ]
 }, {
-  input: 'src/qocode.js',
+  input: 'src/api.js',
   external: ['./external.js'],
   output: {
     dir: '.',

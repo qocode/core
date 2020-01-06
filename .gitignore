@@ -20,5 +20,5 @@ node_modules/
 *.tgz
 
 # Generate output
-external.js
-qocode.js
+/api.js
+/external.js

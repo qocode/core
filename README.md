@@ -1,1 +1,3 @@
-# external
+# Quick Order Code - API
+
+Публичное API для системы быстрого оформления заказов
