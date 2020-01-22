@@ -5,9 +5,12 @@
   "license": "Unlicense",
   "repository": "github:qocode/qocode",
   "type": "module",
-  "main": "api.js",
+  "exports": {
+    "./qosource": "./qosource.js",
+    "./external": "./external.js"
+  },
   "files": [
-    "api.js",
+    "qosource.js",
     "external.js"
   ],
   "dependencies": {
