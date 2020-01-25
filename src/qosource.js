@@ -1,4 +1,15 @@
-import * as ext from './external.js'
+import pako from 'pako'
 
+/**
+ *
+ */
+export class QOSource {
 
-console.log(ext)
+  /**
+   *
+   */
+  log() {
+    console.log(pako.Deflate)
+  }
+
+}

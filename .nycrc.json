@@ -1,7 +1,8 @@
 {
   "extends": "@nodutilus/nyc-config",
-  "exclude": [
-    "build/"
+  "include": [
+    "src",
+    "test.js"
   ],
   "temp-dir": "./build/nyc_output",
   "report-dir": "./build/coverage"
