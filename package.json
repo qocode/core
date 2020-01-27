@@ -1,17 +1,12 @@
 {
   "name": "qocode",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Quick Order Code",
   "license": "Unlicense",
   "repository": "github:qocode/qocode",
   "type": "module",
-  "exports": {
-    "./qosource": "./qosource.js",
-    "./external": "./external.js"
-  },
   "files": [
-    "qosource.js",
-    "external.js"
+    "build/qosource.js"
   ],
   "dependencies": {
     "@zxing/library": "^0.15.2",
@@ -21,6 +16,7 @@
   "devDependencies": {
     "@nodutilus/eslint-config": "^0.3.6",
     "@nodutilus/nyc-config": "^0.2.1",
+    "@rollup/plugin-alias": "^3.0.0",
     "@rollup/plugin-commonjs": "^11.0.1",
     "@rollup/plugin-node-resolve": "^7.0.0",
     "rollup": "^1.30.0",
@@ -28,6 +24,6 @@
     "rollup-plugin-terser": "^5.2.0"
   },
   "scripts": {
-    "prepare": "rollup --config"
+    "prepare": "npx rollup --config"
   }
 }
