@@ -9,7 +9,8 @@ export class QOSource {
    *
    */
   log() {
-    console.log(pako.Deflate)
+    console.log(pako.deflateRaw)
+    console.log(pako.inflateRaw)
   }
 
 }
