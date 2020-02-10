@@ -13,7 +13,7 @@ class TestQOCode extends Test {
   [Test.afterEachDeep]({ path, name, result: { success, error } }) {
     const result = success ? 'success:' : 'failure:'
 
-    console.log(result, path.join(','), '-', name)
+    console.log(result, path.join(','), '->', name)
     if (error) { console.error(error.stack) }
   }
 
