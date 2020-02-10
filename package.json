@@ -16,6 +16,8 @@
   "devDependencies": {
     "@nodutilus/eslint-config": "^0.4.2",
     "@nodutilus/nyc-config": "^0.2.3",
+    "@nodutilus/ci-cd": "^0.2.2",
+    "@nodutilus/test": "^0.1.0",
     "@rollup/plugin-alias": "^3.0.1",
     "@rollup/plugin-commonjs": "^11.0.2",
     "@rollup/plugin-node-resolve": "^7.1.1",

@@ -1,9 +1,0 @@
-{
-  "extends": "@nodutilus/nyc-config",
-  "include": [
-    "src",
-    "test.js"
-  ],
-  "temp-dir": "./build/nyc_output",
-  "report-dir": "./build/coverage"
-}

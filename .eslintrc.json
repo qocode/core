@@ -4,6 +4,16 @@
     "browser": true,
     "node": false
   },
+  "overrides": [
+    {
+      "files": [
+        "./nyc.config.cjs"
+      ],
+      "env": {
+        "node": true
+      }
+    }
+  ],
   "ignorePatterns": [
     "build/"
   ]
