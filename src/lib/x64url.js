@@ -102,6 +102,7 @@ function decodeURLx64(x64text) {
   return new Uint8Array(uint8Array)
 }
 
+
 /**
  * Проверяет что строка содержит только разрешенные для URL символы
  *
