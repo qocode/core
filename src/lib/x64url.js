@@ -20,6 +20,15 @@ function intToX16Pos2(value) {
  * @param {number} value
  * @returns {string}
  */
+function intToX16Pos3(value) {
+  return ('00' + value.toString(16)).slice(-3)
+}
+
+
+/**
+ * @param {number} value
+ * @returns {string}
+ */
 function intToX64(value) {
   let result = ''
 
@@ -65,7 +74,7 @@ function intToX64Pos2(value) {
  * @param {Uint8Array} uint8Array
  * @returns {string}
  */
-function uint8ArrayToURLx64(uint8Array) {
+function encodeURLx64(uint8Array) {
   const x16 = uint8Array
     .reduce((data, item) => (data += intToX16Pos2(item)), '')
     .match(/.{1,3}/g)
@@ -75,6 +84,23 @@ function uint8ArrayToURLx64(uint8Array) {
   return x64 + (last ? partDelimiter + last : '')
 }
 
+
+/**
+ *
+ * @param {string} x64text
+ * @returns {Uint8Array}
+ */
+function decodeURLx64(x64text) {
+  const [x64, last] = x64text.split(partDelimiter)
+  const x16 = x64
+    .match(/.{1,2}/g)
+    .reduce((data, item) => (data += intToX16Pos3(x64ToInt(item))), '') +
+    (last || '')
+  const uint8Array = x16.match(/.{1,2}/g)
+    .map(item => parseInt(item, 16))
+
+  return new Uint8Array(uint8Array)
+}
 
 /**
  * Проверяет что строка содержит только разрешенные для URL символы
@@ -89,9 +115,11 @@ function testURLx64(text) {
 
 export {
   intToX16Pos2,
+  intToX16Pos3,
   intToX64,
   x64ToInt,
   intToX64Pos2,
-  uint8ArrayToURLx64,
+  encodeURLx64,
+  decodeURLx64,
   testURLx64
 }
