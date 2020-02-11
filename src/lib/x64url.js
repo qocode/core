@@ -76,10 +76,22 @@ function uint8ArrayToURLx64(uint8Array) {
 }
 
 
+/**
+ * Проверяет что строка содержит только разрешенные для URL символы
+ *
+ * @param {string} text
+ * @returns {boolean}
+ */
+function testURLx64(text) {
+  return x64RE.test(String(text))
+}
+
+
 export {
   intToX16Pos2,
   intToX64,
   x64ToInt,
   intToX64Pos2,
-  uint8ArrayToURLx64
+  uint8ArrayToURLx64,
+  testURLx64
 }
