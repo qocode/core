@@ -1,5 +1,7 @@
 import { Test, assert } from '@nodutilus/test'
-import { QOSource } from '../src/qosource.js'
+import {
+  deflateURLSearchParams, inflateURLSearchParams
+} from '../src/qosource.js'
 import {
   intToX16Pos2, intToX16Pos3, intToX64, x64ToInt,
   intToX64Pos2, encodeURLx64, decodeURLx64, testURLx64
@@ -7,13 +9,6 @@ import {
 
 /** Тесты источника данных заказа */
 export default class TestQOSource extends Test {
-
-  /** init */
-  ['init']() {
-    const x = new QOSource()
-
-    assert.equal(x.log(), undefined)
-  }
 
   /** Приведение к числу с основанием 16, максимум 2 знака, 0-255 */
   ['x64url - intToX16Pos2']() {
@@ -94,6 +89,41 @@ export default class TestQOSource extends Test {
       '-_.'
 
     assert.equal(testURLx64(x64alphabet), true)
+  }
+
+  /** Проверка сжатия параметров URL */
+  ['qosource - deflateURLSearchParams']() {
+    assert.equal(deflateURLSearchParams('Привет'), 'KP3_oIe57hsSntxWIgA0')
+    assert.equal(deflateURLSearchParams('{"api":"qcos.ru","name":"Привет"}'),
+      'GRpabcxkIB8GjcULRyIGlt9hOALcjgkan9x_Iu72zwKrbCOZSahk2M')
+
+    const test = deflateURLSearchParams('ПриветПриветПриветПривет')
+
+    assert.equal(testURLx64(test), true)
+
+    const { URL, location } = window
+    const url = new URL('/', location.href)
+
+    url.search = deflateURLSearchParams('{"api":"qcos.ru","name":"Привет"}')
+    assert.equal(url.href, 'https://qcos.ru/?GRpabcxkIB8GjcULRyIGlt9hOALcjgkan9x_Iu72zwKrbCOZSahk2M')
+  }
+
+  /** Проверка распаковки параметров URL */
+  ['qosource - inflateURLSearchParams']() {
+    assert.equal(inflateURLSearchParams('KP3_oIe57hsSntxWIgA0'), 'Привет')
+    assert.equal(inflateURLSearchParams('GRpabcxkIB8GjcULRyIGlt9hOALcjgkan9x_Iu72zwKrbCOZSahk2M'),
+      '{"api":"qcos.ru","name":"Привет"}')
+
+    assert.equal(inflateURLSearchParams(deflateURLSearchParams('ПриветПривет')), 'ПриветПривет')
+    assert.equal(inflateURLSearchParams(deflateURLSearchParams('{}')), '{}')
+
+    const json = JSON.stringify({
+      api: 'qcos.ru',
+      name: 'Имя 1',
+      price: 100
+    })
+
+    assert.equal(inflateURLSearchParams(deflateURLSearchParams(json)), json)
   }
 
 }

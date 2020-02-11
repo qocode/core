@@ -23,7 +23,8 @@
     "@rollup/plugin-node-resolve": "latest",
     "rollup": "latest",
     "rollup-plugin-cleanup": "latest",
-    "rollup-plugin-terser": "latest"
+    "rollup-plugin-terser": "latest",
+    "jsdom": "latest"
   },
   "scripts": {
     "prepare": "npx rollup --config"

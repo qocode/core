@@ -12,6 +12,15 @@
       "env": {
         "node": true
       }
+    },
+    {
+      "files": [
+        "./test/**"
+      ],
+      "env": {
+        "browser": true,
+        "node": true
+      }
     }
   ],
   "ignorePatterns": [
