@@ -24,7 +24,9 @@
     "rollup": "latest",
     "rollup-plugin-cleanup": "latest",
     "rollup-plugin-terser": "latest",
-    "jsdom": "latest"
+    "jsdom": "latest",
+    "fastify": "latest",
+    "fastify-static": "latest"
   },
   "scripts": {
     "prepare": "npx rollup --config"

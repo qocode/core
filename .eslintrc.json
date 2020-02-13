@@ -21,6 +21,15 @@
         "browser": true,
         "node": true
       }
+    },
+    {
+      "files": [
+        "./webtest/index.js"
+      ],
+      "env": {
+        "browser": false,
+        "node": true
+      }
     }
   ],
   "ignorePatterns": [
