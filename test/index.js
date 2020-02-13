@@ -1,13 +1,7 @@
-import jsdom from 'jsdom'
+import './emulateDOM.js'
 import { Test } from '@nodutilus/test'
 import { Application } from '@nodutilus/ci-cd'
 import TestQOSource from './qosource.js'
-
-const { JSDOM } = jsdom
-const { window } = new JSDOM('', { url: 'https://qcos.ru/' })
-
-
-global.window = window
 
 
 /** Общий тестовый класс */

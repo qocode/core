@@ -1,6 +1,7 @@
 import { Test, assert } from '@nodutilus/test'
 import {
-  deflateURLSearchParams, inflateURLSearchParams
+  deflateURLSearchParams, inflateURLSearchParams,
+  QOData
 } from '../src/qosource.js'
 import {
   intToX16Pos2, intToX16Pos3, intToX64, x64ToInt,
@@ -124,6 +125,33 @@ export default class TestQOSource extends Test {
     })
 
     assert.equal(inflateURLSearchParams(deflateURLSearchParams(json)), json)
+  }
+
+  /** Проверка опций по умолчанию для QOData */
+  ['QOData - init options']() {
+    const qodata1 = new QOData()
+    const qodata2 = new QOData(null, { url: 'http://qcos.ru' })
+
+    assert.equal(qodata1.options.url, 'https://qcos.ru')
+    assert.equal(qodata2.options.url, 'http://qcos.ru')
+  }
+
+  /** QOData - парсинг данных из url в формате deflate-json и объекта */
+  ['QOData - parse string url']() {
+    const { URL } = window
+    const param1 = deflateURLSearchParams(JSON.stringify({ api: 'qcos.ru' }))
+    const param2 = deflateURLSearchParams(JSON.stringify({ price: 100 }))
+    const url = `http://qcos.ru/?name=title&${param1}&${param2}`
+    const qodata = new QOData(url)
+
+    assert.deepEqual(qodata.raw, { api: 'qcos.ru', name: 'title', price: 100 })
+    qodata.update(new URL('http://qcos.ru/?name=title1&='))
+    assert.deepEqual(qodata.raw, { api: 'qcos.ru', name: 'title1', price: 100 })
+    qodata.update({ price: 1000 })
+    qodata.update()
+    qodata.update(null)
+    qodata.update(123)
+    assert.deepEqual(qodata.raw, { api: 'qcos.ru', name: 'title1', price: 1000 })
   }
 
 }
