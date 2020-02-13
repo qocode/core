@@ -16,7 +16,7 @@ class TestQOCode extends Test {
     const result = success ? 'success:' : 'failure:'
 
     console.log(result, path.join(','), '->', name)
-    if (error) { console.error(error.stack) }
+    if (error) { console.error(error.stack || error) }
   }
 
   static TestQOSource = TestQOSource
