@@ -1,6 +1,6 @@
 import { Test, assert } from '@nodutilus/test'
 import {
-  deflateURLSearchParams, inflateURLSearchParams,
+  deflateJSONURL, inflateJSONURL,
   QOData
 } from '../src/qosource.js'
 import {
@@ -93,38 +93,38 @@ export default class TestQOSource extends Test {
   }
 
   /** Проверка сжатия параметров URL */
-  ['qosource - deflateURLSearchParams']() {
-    assert.equal(deflateURLSearchParams('Привет'), 'KP3_oIe57hsSntxWIgA0')
-    assert.equal(deflateURLSearchParams('{"api":"qcos.ru","name":"Привет"}'),
+  ['qosource - deflateJSONURL']() {
+    assert.equal(deflateJSONURL({ name: 'Привет' }), 'GRraiYNdlr9iKz3_oIe57hsSntxWIkCF5w')
+    assert.equal(deflateJSONURL({ api: 'qcos.ru', name: 'Привет' }),
       'GRpabcxkIB8GjcULRyIGlt9hOALcjgkan9x_Iu72zwKrbCOZSahk2M')
 
-    const test = deflateURLSearchParams('ПриветПриветПриветПривет')
+    const test = deflateJSONURL({ name: 'ПриветПриветПриветПривет' })
 
     assert.equal(testURLx64(test), true)
 
     const { URL, location } = window
     const url = new URL('/', location.href)
 
-    url.search = deflateURLSearchParams('{"api":"qcos.ru","name":"Привет"}')
+    url.search = deflateJSONURL({ api: 'qcos.ru', name: 'Привет' })
     assert.equal(url.href, 'https://qcos.ru/?GRpabcxkIB8GjcULRyIGlt9hOALcjgkan9x_Iu72zwKrbCOZSahk2M')
   }
 
   /** Проверка распаковки параметров URL */
-  ['qosource - inflateURLSearchParams']() {
-    assert.equal(inflateURLSearchParams('KP3_oIe57hsSntxWIgA0'), 'Привет')
-    assert.equal(inflateURLSearchParams('GRpabcxkIB8GjcULRyIGlt9hOALcjgkan9x_Iu72zwKrbCOZSahk2M'),
-      '{"api":"qcos.ru","name":"Привет"}')
+  ['qosource - inflateJSONURL']() {
+    assert.deepEqual(inflateJSONURL('GRraiYNdlr9iKz3_oIe57hsSntxWIkCF5w'), { name: 'Привет' })
+    assert.deepEqual(inflateJSONURL('GRpabcxkIB8GjcULRyIGlt9hOALcjgkan9x_Iu72zwKrbCOZSahk2M'),
+      { api: 'qcos.ru', name: 'Привет' })
 
-    assert.equal(inflateURLSearchParams(deflateURLSearchParams('ПриветПривет')), 'ПриветПривет')
-    assert.equal(inflateURLSearchParams(deflateURLSearchParams('{}')), '{}')
+    assert.deepEqual(inflateJSONURL(deflateJSONURL({ x: 'ПриветПривет' })), { x: 'ПриветПривет' })
+    assert.deepEqual(inflateJSONURL(deflateJSONURL({})), {})
 
-    const json = JSON.stringify({
+    const json = {
       api: 'qcos.ru',
       name: 'Имя 1',
       price: 100
-    })
+    }
 
-    assert.equal(inflateURLSearchParams(deflateURLSearchParams(json)), json)
+    assert.deepEqual(inflateJSONURL(deflateJSONURL(json)), json)
   }
 
   /** Проверка опций по умолчанию для QOData */
@@ -139,8 +139,8 @@ export default class TestQOSource extends Test {
   /** QOData - парсинг данных из url в формате deflate-json и объекта */
   ['QOData - parse string url']() {
     const { URL } = window
-    const param1 = deflateURLSearchParams(JSON.stringify({ api: 'qcos.ru' }))
-    const param2 = deflateURLSearchParams(JSON.stringify({ price: 100 }))
+    const param1 = deflateJSONURL({ api: 'qcos.ru' })
+    const param2 = deflateJSONURL({ price: 100 })
     const url = `http://qcos.ru/?name=title&${param1}&${param2}`
     const qodata = new QOData(url)
 

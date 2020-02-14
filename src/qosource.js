@@ -5,13 +5,14 @@ const { location, URL, URLSearchParams } = window
 
 
 /**
- * Сжатие параметров поиска URL для использования в ссылке,
+ * Сжатие json-объекта для использования в URL,
  *  использует только разрешенный для URL символы.
  *
- * @param {string} text
+ * @param {object} json
  * @returns {string}
  */
-function deflateURLSearchParams(text) {
+function deflateJSONURL(json) {
+  const text = JSON.stringify(json)
   const deflateRaw = pako.deflateRaw(text)
   const deflate = encodeURLx64(deflateRaw)
 
@@ -20,17 +21,18 @@ function deflateURLSearchParams(text) {
 
 
 /**
- * Распаковка сжатых параметров поиска URL.
- * Обратный метод для deflateURLSearchParams.
+ * Распаковка сжатого json-объекта из URL.
+ * Обратный метод для deflateJSONURL.
  *
  * @param {string} text
- * @returns {string}
+ * @returns {object}
  */
-function inflateURLSearchParams(text) {
+function inflateJSONURL(text) {
   const inflate = decodeURLx64(text)
   const inflateRaw = pako.inflateRaw(inflate, { to: 'string' })
+  const json = JSON.parse(inflateRaw)
 
-  return inflateRaw
+  return json
 }
 
 
@@ -91,7 +93,7 @@ class QOData {
   static applyURLSearchParams(raw, searchParams) {
     for (const [key, value] of searchParams.entries()) {
       if (key && !value) {
-        const json = JSON.parse(inflateURLSearchParams(key))
+        const json = inflateJSONURL(key)
 
         this.setRawFields(raw, Object.entries(json))
       } else if (key && value) {
@@ -114,7 +116,7 @@ class QOData {
 
 
 export {
-  deflateURLSearchParams,
-  inflateURLSearchParams,
+  deflateJSONURL,
+  inflateJSONURL,
   QOData
 }
