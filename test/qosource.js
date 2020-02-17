@@ -136,7 +136,7 @@ export default class TestQOSource extends Test {
     assert.equal(qodata2.options.url, 'http://qcos.ru')
   }
 
-  /** QOData - парсинг данных из url в формате deflate-json и объекта */
+  /** QOData - парсинг данных из url и searchParams в формате deflate-json и объекта */
   ['QOData - parse string url']() {
     const { URL } = window
     const param1 = deflateJSONURL({ api: 'qcos.ru' })
@@ -145,13 +145,37 @@ export default class TestQOSource extends Test {
     const qodata = new QOData(url)
 
     assert.deepEqual(qodata.raw, { api: 'qcos.ru', name: 'title', price: 100 })
+
     qodata.update(new URL('http://qcos.ru/?name=title1&='))
     assert.deepEqual(qodata.raw, { api: 'qcos.ru', name: 'title1', price: 100 })
+
+    qodata.update(new URL('http://qcos.ru/?api=qcos1.ru&=').searchParams)
+    assert.deepEqual(qodata.raw, { api: 'qcos1.ru', name: 'title1', price: 100 })
+
     qodata.update({ price: 1000 })
     qodata.update()
     qodata.update(null)
     qodata.update(123)
-    assert.deepEqual(qodata.raw, { api: 'qcos.ru', name: 'title1', price: 1000 })
+    assert.deepEqual(qodata.raw, { api: 'qcos1.ru', name: 'title1', price: 1000 })
+  }
+
+  /** QOData - парсинг данных из FormData */
+  ['QOData - parse form']() {
+    const { document, FormData } = window
+    const form = document.createElement('form')
+    const qodata = new QOData()
+
+    form.innerHTML =
+      '<input type="text" name="api" value="qcos.ru"/>' +
+      '<input type="text" name="name" value="title"/>'
+    qodata.update(form)
+    assert.deepEqual(qodata.raw, { api: 'qcos.ru', name: 'title' })
+
+    form.innerHTML =
+      '<input type="text" name="api" value="qcos1.ru"/>' +
+      '<input type="text" name="name" value="title1"/>'
+    qodata.update(new FormData(form))
+    assert.deepEqual(qodata.raw, { api: 'qcos1.ru', name: 'title1' })
   }
 
 }

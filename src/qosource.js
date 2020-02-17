@@ -1,7 +1,7 @@
 import { pako } from './pako.js'
 import { encodeURLx64, decodeURLx64 } from './lib/x64url.js'
 
-const { location, URL, URLSearchParams } = window
+const { location, URL, URLSearchParams, HTMLFormElement, FormData } = window
 
 
 /**
@@ -74,13 +74,15 @@ class QOData {
    */
   update(data) {
     if (typeof data === 'string') {
-      data = new URL(data).searchParams
-    }
-    if (data instanceof URL) {
-      data = data.searchParams
-    }
-    if (data instanceof URLSearchParams) {
+      QOData.applyURLSearchParams(this.raw, new URL(data).searchParams)
+    } else if (data instanceof URL) {
+      QOData.applyURLSearchParams(this.raw, data.searchParams)
+    } else if (data instanceof URLSearchParams) {
       QOData.applyURLSearchParams(this.raw, data)
+    } else if (data instanceof HTMLFormElement) {
+      QOData.setRawFields(this.raw, new FormData(data).entries())
+    } else if (data instanceof FormData) {
+      QOData.setRawFields(this.raw, data.entries())
     } else if (data instanceof Object) {
       QOData.setRawFields(this.raw, Object.entries(data))
     }
