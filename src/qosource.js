@@ -66,29 +66,53 @@ class QOData {
 
     /** @type {QODataRaw} */
     this.raw = {}
+    /** @type {Error|null} */
+    this.error = null
+    /** @type {Array<Error>} */
+    this.errors = []
+    /** @type {Boolean|null} */
+    this.valid = null
+    /** @type {Boolean|null} */
+    this.seller = null
+    /** @type {Boolean|null} */
+    this.product = null
     this.update(data)
   }
 
   /**
+   * Обновление данных о заказе из url адреса или dom-формы
+   *
    * @param {URL|URLSearchParams|FormData} data
    */
   update(data) {
-    if (typeof data === 'string') {
-      QOData.applyURLSearchParams(this.raw, new URL(data).searchParams)
-    } else if (data instanceof URL) {
-      QOData.applyURLSearchParams(this.raw, data.searchParams)
-    } else if (data instanceof URLSearchParams) {
-      QOData.applyURLSearchParams(this.raw, data)
-    } else if (data instanceof HTMLFormElement) {
-      QOData.setRawFields(this.raw, new FormData(data).entries())
-    } else if (data instanceof FormData) {
-      QOData.setRawFields(this.raw, data.entries())
-    } else if (data instanceof Object) {
-      QOData.setRawFields(this.raw, Object.entries(data))
+    try {
+      if (typeof data === 'string') {
+        QOData.applyURLSearchParams(this.raw, new URL(data).searchParams)
+      } else if (data instanceof URL) {
+        QOData.applyURLSearchParams(this.raw, data.searchParams)
+      } else if (data instanceof URLSearchParams) {
+        QOData.applyURLSearchParams(this.raw, data)
+      } else if (data instanceof HTMLFormElement) {
+        QOData.setRawFields(this.raw, new FormData(data).entries())
+      } else if (data instanceof FormData) {
+        QOData.setRawFields(this.raw, data.entries())
+      } else if (data instanceof Object) {
+        QOData.setRawFields(this.raw, Object.entries(data))
+      }
+      [this.valid, this.seller, this.product] = QOData.validate(this.raw)
+    } catch (error) {
+      [, this.seller, this.product] = QOData.validate(this.raw)
+      this.valid = false
+      this.error = error
+      this.errors.push(error)
     }
   }
 
   /**
+   * Получение данных о заказе из url адреса.
+   * С учетом данных сжатых в формате URLx64,
+   *  использующем только допустимые символы URL
+   *
    * @param {QODataRaw} raw
    * @param {URLSearchParams} searchParams
    */
@@ -105,6 +129,8 @@ class QOData {
   }
 
   /**
+   * Общий метод записи данных о заказе в формате "entries"
+   *
    * @param {QODataRaw} raw
    * @param {Array<Array<string,string>>} fields
    */
@@ -112,6 +138,20 @@ class QOData {
     for (const [key, value] of fields) {
       raw[key] = value
     }
+  }
+
+  /**
+   * Проверка корректности формата данных для заказа
+   *
+   * @param {QODataRaw} data
+   * @returns {Array<Boolean>}
+   */
+  static validate(data) {
+    const seller = 'api' in data
+    const product = 'name' in data && 'price' in data
+    const valid = seller || product
+
+    return [valid, seller, product]
   }
 
 }
