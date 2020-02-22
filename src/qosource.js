@@ -41,6 +41,18 @@ function inflateJSONURL(text) {
  */
 class QOData {
 
+  /** @type {{string:string}} */
+  static propsMap = {
+    a: 'api', //    URL сервиса для работы с заказами (Api url)
+    s: 'seller', // Название продавца (Seller name)
+    n: 'name', //   Название товара (product Name)
+    p: 'price' //   Цена товара (product Price)
+  }
+
+  /** @type {{string:string}} */
+  static propsMapShort = Object.entries(this.propsMap)
+    .reduce((short, [key, value]) => (short[value] = key) && short, {})
+
   /**
    * @typedef QODataOptions
    * @property {string} [url=location.origin]
@@ -136,7 +148,13 @@ class QOData {
    */
   static setRawFields(raw, fields) {
     for (const [key, value] of fields) {
-      raw[key] = value
+      if (key && value && typeof key === 'string') {
+        if (key in QOData.propsMap) {
+          raw[QOData.propsMap[key]] = value
+        } else {
+          raw[key] = value
+        }
+      }
     }
   }
 
