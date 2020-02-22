@@ -82,6 +82,7 @@ class QOData {
     if (options.host) {
       this.baseURL.host = options.host
     }
+
     /** @type {QODataRaw} */
     this.raw = {}
     /** @type {Error|null} */
