@@ -16,7 +16,7 @@ const url = `http://qcos.ru/?name=title&${param1}&${param2}`
 const qodata = new QOData(url)
 
 
-qodata.update(new URL('http://qcos.ru/?name=title1&='))
+qodata.update(new URL('http://qcos.ru/?name=тест&='))
 qodata.update({ price: 1000 })
 console.log(qodata.raw)
 console.log(qodata.stringify())
