@@ -72,10 +72,16 @@ class QOData {
    */
   constructor(data, options = {}) {
     /** @type {QODataOptions} */
-    this.options = Object.assign({
+    options = Object.assign({
       url: location.origin
     }, options)
 
+    /** @type {string} */
+    this.baseURL = new URL(options.url, location.origin)
+    this.baseURL = new URL(this.baseURL.origin + this.baseURL.pathname)
+    if (options.host) {
+      this.baseURL.host = options.host
+    }
     /** @type {QODataRaw} */
     this.raw = {}
     /** @type {Error|null} */
