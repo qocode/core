@@ -6,9 +6,11 @@
   "repository": "github:qocode/qocode",
   "type": "module",
   "files": [
+    "api.js",
     "build/external.js",
     "build/qosource.js"
   ],
+  "main": "api.js",
   "dependencies": {
     "@zxing/library": "^0.15.2",
     "pako": "^1.0.11",
@@ -20,6 +22,7 @@
     "@nodutilus/ci-cd": "latest",
     "@nodutilus/test": "latest",
     "@babel/plugin-proposal-class-properties": "latest",
+    "@rollup/plugin-alias": "latest",
     "@rollup/plugin-commonjs": "latest",
     "@rollup/plugin-node-resolve": "latest",
     "rollup": "latest",
@@ -31,6 +34,7 @@
     "fastify-static": "latest"
   },
   "scripts": {
-    "prepare": "npx rollup --config"
+    "build": "npx rollup --config",
+    "prepack": "npx rollup --config"
   }
 }

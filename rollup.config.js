@@ -1,3 +1,4 @@
+import alias from '@rollup/plugin-alias'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import babel from 'rollup-plugin-babel'
@@ -31,4 +32,13 @@ export default [{
   input: 'build/tmp/qosource.js',
   output: { file: 'build/qosource.js', format: 'esm' },
   plugins: [cleanup({ comments: 'none' })]
+}, {
+  input: 'src/api.js',
+  output: { file: 'api.js', format: 'esm' },
+  plugins: [alias({
+    entries: [
+      { find: './external.js', replacement: '../build/external.js' },
+      { find: './qosource.js', replacement: '../build/qosource.js' }
+    ]
+  })]
 }]

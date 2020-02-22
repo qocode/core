@@ -33,6 +33,7 @@
     }
   ],
   "ignorePatterns": [
+    "api.js",
     "build/"
   ]
 }
