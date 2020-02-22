@@ -35,7 +35,7 @@ jobs:
           node-version: ">=13"
       - name: Install dependencies
         run: npm install
-      - name: Run Tests
+      - name: Run tests
         run: node test
 
   coverage:
