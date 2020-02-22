@@ -4,14 +4,14 @@ import {
 } from './build/qosource.js'
 
 
-console.log(deflateJSONURL('!deflateJSONURL!'))
+console.log(deflateJSONURL({ test: 'test' }))
 
-console.log(inflateJSONURL(deflateJSONURL('!inflateJSONURL!')))
+console.log(inflateJSONURL(deflateJSONURL({ test: 'test' })))
 
 
 const { URL } = window
-const param1 = deflateJSONURL(JSON.stringify({ api: 'qcos.ru' }))
-const param2 = deflateJSONURL(JSON.stringify({ price: 100 }))
+const param1 = deflateJSONURL({ api: 'qcos.ru' })
+const param2 = deflateJSONURL({ price: 100 })
 const url = `http://qcos.ru/?name=title&${param1}&${param2}`
 const qodata = new QOData(url)
 
