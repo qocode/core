@@ -48,13 +48,26 @@ jobs:
           node-version: ">=13"
       - name: Install dependencies
         run: npm install
-      - name: Check Coverage
+      - name: Check coverage
         run: npx nodutilus-nyc
+
+  test-build:
+    name: Test Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: ">=13"
+      - name: Install dependencies
+        run: npm install
+      - name: Create package
+        run: npm pack
 
   # Для изменений в мастере - публикуем
   build-and-publish:
     name: Build & Publish
-    needs: [checks, tests, coverage]
+    needs: [checks, tests, coverage, test-build]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
