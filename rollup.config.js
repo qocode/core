@@ -5,6 +5,15 @@ import cleanup from 'rollup-plugin-cleanup'
 import { terser } from 'rollup-plugin-terser'
 
 export default [{
+  input: 'src/external.js',
+  output: { file: 'build/external.js', format: 'esm', compact: true },
+  plugins: [
+    resolve({ browser: true, preferBuiltins: false }),
+    commonjs({ include: 'node_modules/**' }),
+    cleanup({ comments: 'none' }),
+    terser()
+  ]
+}, {
   input: 'src/pako.js',
   output: { file: 'build/tmp/pako.js', format: 'esm', compact: true },
   plugins: [
