@@ -260,12 +260,55 @@ export default class TestQOSource extends Test {
     assert.deepEqual(raw, { api: 'a', name: 'n', price: 1, test: '1' })
   }
 
-  /** Получение ссылка на товар c простыми параметрами поиска */
+  /** Получение ссылки на товар c простыми параметрами поиска */
   ['QOData - stringify simple']() {
-    const qodata = new QOData({ api: 'qcos.ru', name: 'test', price: 100, ext: 'test' })
-    const url = qodata.stringify()
+    const qodata1 = new QOData({ api: 'qcos.ru', name: 'test', price: '100', ext: 'test' })
+    const url = qodata1.stringify()
+    const qodata2 = new QOData(url)
 
     assert.equal(url, 'https://qcos.ru/?a=qcos.ru&n=test&p=100&ext=test')
+    assert.deepEqual(qodata2.raw, qodata1.raw)
+  }
+
+  /** Получение ссылки на товар со сжатыми данными */
+  ['QOData - stringify deflate']() {
+    const qodata1 = new QOData({ api: 'qcos.ru/api', name: 'тест', price: '100р.', ext: 'тест' })
+    const url = qodata1.stringify()
+    const qodata2 = new QOData(url)
+
+    assert.equal(url, 'https://qcos.ru/?GRpalb9iaAPebZoHaJlfbcxkQB7a0UFsrbGMZmbzNiowJM38djgMKdyw1-iAlFgwOZo2')
+    assert.deepEqual(qodata2.raw, qodata1.raw)
+  }
+
+  /** Получение ссылки на товар c простыми и сжатыми данными */
+  ['QOData - stringify simple+deflate']() {
+    const qodata1 = new QOData({ api: 'qcos.ru', name: 'тест', price: '100р.', ext: 'test' })
+    const url = qodata1.stringify()
+    const qodata2 = new QOData(url)
+
+    assert.equal(url, 'https://qcos.ru/?a=qcos.ru&ext=test&GRrakX9iKJxQouL5NEJdizFa1k2KEo71NgoZFlE0')
+    assert.deepEqual(qodata2.raw, qodata1.raw)
+  }
+
+  /** Получение ссылки на товар без сжатия данных */
+  ['QOData - stringify deflate=false']() {
+    const qodata1 = new QOData({ name: 'тест', price: '100р.' }, { deflate: false })
+    const url = qodata1.stringify()
+    const qodata2 = new QOData(url)
+
+    assert.equal(url, 'https://qcos.ru/?n=%D1%82%D0%B5%D1%81%D1%82&p=100%D1%80.')
+    assert.equal(decodeURIComponent(url), 'https://qcos.ru/?n=тест&p=100р.')
+    assert.deepEqual(qodata2.raw, qodata1.raw)
+  }
+
+  /** Получение ссылки на товар всегда со сжатием данных */
+  ['QOData - stringify deflate=true']() {
+    const qodata1 = new QOData({ name: 'name', price: '100' }, { deflate: true })
+    const url = qodata1.stringify()
+    const qodata2 = new QOData(url)
+
+    assert.equal(url, 'https://qcos.ru/?GRrakX9iOALcjlnikiE0cwQd39hG.1')
+    assert.deepEqual(qodata2.raw, qodata1.raw)
   }
 
 }

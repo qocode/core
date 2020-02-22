@@ -1,5 +1,5 @@
 import { pako } from './pako.js'
-import { encodeURLx64, decodeURLx64 } from './lib/x64url.js'
+import { encodeURLx64, decodeURLx64, testURLx64 } from './lib/x64url.js'
 
 const { location, URL, URLSearchParams, HTMLFormElement, FormData } = window
 
@@ -57,6 +57,7 @@ class QOData {
    * @typedef QODataOptions
    * @property {string} [url=location.origin]
    * @property {string} [host]
+   * @property {boolean} [deflate]
    */
   /**
    * @typedef QODataRaw
@@ -82,6 +83,8 @@ class QOData {
     if (options.host) {
       this.baseURL.host = options.host
     }
+    /** @type {boolean} */
+    this.deflate = options.deflate
 
     /** @type {QODataRaw} */
     this.raw = {}
@@ -135,9 +138,19 @@ class QOData {
   stringify() {
     const result = new URL('', this.baseURL)
     const search = result.searchParams
+    const deflateData = {}
 
     for (const [key, value] of Object.entries(this.raw)) {
-      search.set(QOData.propsMapShort[key] || key, value)
+      if (this.deflate === false || (this.deflate !== true && testURLx64(key + value))) {
+        search.set(QOData.propsMapShort[key] || key, value)
+      } else {
+        deflateData[QOData.propsMapShort[key] || key] = value
+      }
+    }
+    if (Object.keys(deflateData).length) {
+      search.set(deflateJSONURL(deflateData), '')
+
+      return result.href.replace(/=$/, '')
     }
 
     return result.href
