@@ -128,6 +128,22 @@ class QOData {
   }
 
   /**
+   * Преобразует данные в URL для хранение в виде ссылка на сайт
+   *
+   * @returns {String}
+   */
+  stringify() {
+    const result = new URL('', this.baseURL)
+    const search = result.searchParams
+
+    for (const [key, value] of Object.entries(this.raw)) {
+      search.set(QOData.propsMapShort[key] || key, value)
+    }
+
+    return result.href
+  }
+
+  /**
    * Получение данных о заказе из url адреса.
    * С учетом данных сжатых в формате URLx64,
    *  использующем только допустимые символы URL

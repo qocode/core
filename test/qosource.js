@@ -260,4 +260,12 @@ export default class TestQOSource extends Test {
     assert.deepEqual(raw, { api: 'a', name: 'n', price: 1, test: '1' })
   }
 
+  /** Получение ссылка на товар c простыми параметрами поиска */
+  ['QOData - stringify simple']() {
+    const qodata = new QOData({ api: 'qcos.ru', name: 'test', price: 100, ext: 'test' })
+    const url = qodata.stringify()
+
+    assert.equal(url, 'https://qcos.ru/?a=qcos.ru&n=test&p=100&ext=test')
+  }
+
 }
