@@ -1,7 +1,7 @@
 import { Test, assert } from '@nodutilus/test'
 import {
   deflateJSONURL, inflateJSONURL,
-  QOData
+  QOData, QOCardData
 } from '../src/qosource.js'
 import {
   intToX16Pos2, intToX16Pos3, intToX64, x64ToInt,
@@ -247,6 +247,10 @@ export default class TestQOSource extends Test {
 
     qodata.update({ api: '6' })
     assert.deepEqual([qodata.valid, qodata.seller, qodata.product], [true, true, true])
+
+    qodata = new QOData({ api: '7', id: '8' })
+
+    assert.deepEqual([qodata.valid, qodata.seller, qodata.product], [true, true, true])
   }
 
   /** Запись полей: встроенные, краткие, кастомные, невалидные */
@@ -309,6 +313,37 @@ export default class TestQOSource extends Test {
 
     assert.equal(url, 'https://qcos.ru/?GRrakX9iOALcjlnikiE0cwQd39hG.1')
     assert.deepEqual(qodata2.raw, qodata1.raw)
+  }
+
+  /** Получение данных товара без данных поставщика */
+  ['QOData - productData']() {
+    const qodata = new QOData({ api: 'qcos.ru/api', seller: 'stest', name: 'test', price: '100' })
+
+    assert.deepEqual(qodata.productData, { name: 'test', price: '100' })
+  }
+
+  /** Установка параметров поставщика в карточке */
+  ['QOCardData - init seller']() {
+    const qodata = new QOData({ api: 'qcos.ru/api', seller: 'stest', name: 'test', price: '100' })
+    const qocarddata = new QOCardData(qodata.stringify())
+
+    assert.equal(qocarddata.api, 'qcos.ru/api')
+    assert.equal(qocarddata.seller, 'stest')
+    assert.equal(qocarddata.valid, true)
+  }
+
+  /** Добавление товара в карточку */
+  ['QOCardData - add']() {
+    const qodata = new QOData({ api: 'qcos.ru/api', seller: 'stest', name: 'test', price: '100' })
+    const qocarddata = new QOCardData(qodata.stringify())
+
+    qocarddata.add(qodata)
+    assert.equal(qocarddata.valid, true)
+    qocarddata.add({ api: 'qcos.ru/api' })
+    assert.equal(qocarddata.valid, false)
+    assert.deepEqual(qocarddata.raw, [{ name: 'test', price: '100', number: 1 }])
+    assert.equal(qocarddata.error.message, 'Не переданы данные товара')
+    assert.equal(qocarddata.errors[0].message, 'Не переданы данные товара')
   }
 
 }

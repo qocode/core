@@ -45,9 +45,14 @@ class QOData {
   static propsMap = {
     a: 'api', //    URL сервиса для работы с заказами (Api url)
     s: 'seller', // Название продавца (Seller name)
+    i: 'id', //     Уникальный идентификатор товара (unique product Id)
     n: 'name', //   Название товара (product Name)
-    p: 'price' //   Цена товара (product Price)
+    p: 'price', //  Цена товара (product Price)
+    u: 'number' //  Количество единиц продукции (number of product Units)
   }
+
+  /** @type {Array<string>} */
+  static propsSeller = ['api', 'seller']
 
   /** @type {{string:string}} */
   static propsMapShort = Object.entries(this.propsMap)
@@ -63,8 +68,10 @@ class QOData {
    * @typedef QODataRaw
    * @property {string} [api]
    * @property {string} [seller]
+   * @property {string} [id]
    * @property {string} [name]
    * @property {string} [price]
+   * @property {number} [number]
    */
   /**
    * @param {URL|URLSearchParams|FormData} data
@@ -88,16 +95,17 @@ class QOData {
 
     /** @type {QODataRaw} */
     this.raw = {}
-    /** @type {Error|null} */
-    this.error = null
-    /** @type {Array<Error>} */
-    this.errors = []
     /** @type {Boolean|null} */
     this.valid = null
     /** @type {Boolean|null} */
     this.seller = null
     /** @type {Boolean|null} */
     this.product = null
+    /** @type {Error|null} */
+    this.error = null
+    /** @type {Array<Error>} */
+    this.errors = []
+
     this.update(data)
   }
 
@@ -157,6 +165,23 @@ class QOData {
   }
 
   /**
+   * Получение данных товара без данных поставщика
+   *
+   * @returns {QODataRaw}
+   */
+  get productData() {
+    const keys = Object.keys(this.raw)
+      .filter(key => !QOData.propsSeller.includes(key))
+    const data = {}
+
+    for (const key of keys) {
+      data[key] = this.raw[key]
+    }
+
+    return data
+  }
+
+  /**
    * Получение данных о заказе из url адреса.
    * С учетом данных сжатых в формате URLx64,
    *  использующем только допустимые символы URL
@@ -202,7 +227,7 @@ class QOData {
    */
   static validate(data) {
     const seller = 'api' in data
-    const product = 'name' in data && 'price' in data
+    const product = ('name' in data && 'price' in data) || 'id' in data
     const valid = seller || product
 
     return [valid, seller, product]
@@ -211,8 +236,95 @@ class QOData {
 }
 
 
+/**
+ * Данные зказа
+ */
+class QOCardData {
+
+  /**
+   * @typedef QOCardDataRawItem
+   * @property {string} [id]
+   * @property {string} [name]
+   * @property {string} [price]
+   * @property {number} [number]
+   */
+  /**
+   * @typedef {Array<QOCardDataRawItem>} QOCardDataRaw
+   */
+  /**
+   * @param {URL|URLSearchParams|FormData|QOData} data
+   * @param {URL|URLSearchParams|QOCardDataRaw} card
+   */
+  constructor(data, card) {
+    const qodata = data instanceof QOData ? data : new QOData(data)
+
+    /** @type {string} */
+    this.api = qodata.raw.api
+    /** @type {string} */
+    this.seller = qodata.raw.seller
+    /** @type {Boolean} */
+    this.valid = !!this.api
+    /** @type {Error|null} */
+    this.error = null
+    /** @type {Array<Error>} */
+    this.errors = []
+
+    this.update(card)
+  }
+
+  /**
+   * Обновление позиций заказа из url адреса или списка товаров.
+   * Очищает ранее добавленные записи.
+   *
+   * @param {URL|URLSearchParams|QOCardDataRaw} card
+   */
+  update(card) {
+    /** @type {QOCardDataRaw} */
+    this.raw = []
+    try {
+      if (typeof data === 'string') {
+        QOCardData.applyURLSearchParams(this.raw, new URL(card).searchParams)
+      } else if (card instanceof URL) {
+        QOCardData.applyURLSearchParams(this.raw, card.searchParams)
+      } else if (card instanceof URLSearchParams) {
+        QOCardData.applyURLSearchParams(this.raw, card)
+      } else if (card instanceof Array) {
+        QOCardData.setRawItems(this.raw, card)
+      }
+    } catch (error) {
+      this.valid = false
+      this.error = error
+      this.errors.push(error)
+    }
+  }
+
+  /**
+   * Добавление позиции в данные заказа
+   *
+   * @param {QOData|QOCardDataRawItem} data
+   */
+  add(data) {
+    const qodata = data instanceof QOData ? data : new QOData(data)
+
+    if (qodata.product) {
+      const { productData } = qodata
+
+      productData.number = productData.number || 1
+
+      this.raw.push(productData)
+    } else {
+      this.valid = false
+      this.error = new Error('Не переданы данные товара')
+      this.errors.push(this.error)
+    }
+  }
+
+}
+
+
 export {
   deflateJSONURL,
   inflateJSONURL,
-  QOData
+  QOData,
+  QOCardData
 }
