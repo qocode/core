@@ -269,6 +269,11 @@ class QOCardData {
     /** @type {Array<Error>} */
     this.errors = []
 
+    if (!this.valid) {
+      this.error = new Error('Не переданы данные продавца')
+      this.errors.push(this.error)
+    }
+
     this.update(card)
   }
 

@@ -315,14 +315,14 @@ export default class TestQOSource extends Test {
     assert.deepEqual(qodata2.raw, qodata1.raw)
   }
 
-  /** Получение данных товара без данных поставщика */
+  /** Получение данных товара без данных продавца */
   ['QOData - productData']() {
     const qodata = new QOData({ api: 'qcos.ru/api', seller: 'stest', name: 'test', price: '100' })
 
     assert.deepEqual(qodata.productData, { name: 'test', price: '100' })
   }
 
-  /** Установка параметров поставщика в карточке */
+  /** Установка параметров продавца в карточке */
   ['QOCardData - init seller']() {
     const qodata = new QOData({ api: 'qcos.ru/api', seller: 'stest', name: 'test', price: '100' })
     const qocarddata = new QOCardData(qodata.stringify())
@@ -330,6 +330,18 @@ export default class TestQOSource extends Test {
     assert.equal(qocarddata.api, 'qcos.ru/api')
     assert.equal(qocarddata.seller, 'stest')
     assert.equal(qocarddata.valid, true)
+  }
+
+  /** Невалидная карточка без продавца */
+  ['QOCardData - init without seller']() {
+    const qodata = new QOData({ name: 'test', price: '100' })
+    const qocarddata = new QOCardData(qodata.stringify())
+
+    assert.equal(qocarddata.api, undefined)
+    assert.equal(qocarddata.seller, undefined)
+    assert.equal(qocarddata.valid, false)
+    assert.equal(qocarddata.error.message, 'Не переданы данные продавца')
+    assert.equal(qocarddata.errors[0].message, 'Не переданы данные продавца')
   }
 
   /** Добавление товара в карточку */
