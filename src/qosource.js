@@ -294,7 +294,9 @@ class QOCardData {
       } else if (card instanceof URLSearchParams) {
         QOCardData.applyURLSearchParams(this.raw, card)
       } else if (card instanceof Array) {
-        QOCardData.setRawItems(this.raw, card)
+        for (const item of card) {
+          this.add(item)
+        }
       }
     } catch (error) {
       this.valid = false
@@ -322,6 +324,32 @@ class QOCardData {
       this.error = new Error('Не переданы данные товара')
       this.errors.push(this.error)
     }
+  }
+
+  /**
+   * Преобразует данные в URL для перехода на оформление заказа
+   *
+   * @returns {String}
+   */
+  stringify() {
+    const result = new URL(this.api, location.origin)
+    const search = result.searchParams
+    const deflateData = []
+
+    for (const item of this.raw) {
+      if ('id' in item && testURLx64('' + item.id + item.number)) {
+        search.set(item.id, item.number)
+      } else {
+        deflateData.push(item)
+      }
+    }
+    if (deflateData.length) {
+      search.set(deflateJSONURL(deflateData), '')
+
+      return result.href.replace(/=$/, '')
+    }
+
+    return result.href
   }
 
 }

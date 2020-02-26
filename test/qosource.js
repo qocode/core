@@ -358,4 +358,30 @@ export default class TestQOSource extends Test {
     assert.equal(qocarddata.errors[0].message, 'Не переданы данные товара')
   }
 
+  /** Запись товара из данных в конструкторе */
+  ['QOCardData - init, card instanceof Array']() {
+    const qodata = new QOData({ api: 'qcos.ru/api', id: 'id_1223' })
+    const qocarddata = new QOCardData(qodata, [qodata])
+
+    assert.deepEqual(qocarddata.raw, [{ id: 'id_1223', number: 1 }])
+  }
+
+  /** Формирование урла заказа с товарами в виде ID */
+  ['QOCardData - stringify with ids']() {
+    const qodata = new QOData({ api: 'qcos.ru/api', id: 'id_1223' })
+    const qocarddata = new QOCardData(qodata, [qodata, { id: 1, number: 2 }])
+    const url = qocarddata.stringify()
+
+    assert.equal(url, 'https://qcos.ru/qcos.ru/api?id_1223=1&1=2')
+  }
+
+  /** Формирование урла заказа с товарами в виде сложных ID и количества */
+  ['QOCardData - stringify with complex ids and number']() {
+    const qodata = new QOData({ api: 'qcos.ru/api', id: 'тест', number: '5шт.' })
+    const qocarddata = new QOCardData(qodata, [qodata, { id: 'id_1223', number: 2 }])
+    const url = qocarddata.stringify()
+
+    assert.equal(url, 'https://qcos.ru/qcos.ru/api?id_1223=2&yWVmOANhIBaWS7hxWYn6yQRaeAFVFrB9Gkl0cteb7hurZ9hGoM.1')
+  }
+
 }
