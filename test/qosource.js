@@ -322,34 +322,82 @@ export default class TestQOSource extends Test {
     assert.deepEqual(qodata.productData, { name: 'test', price: '100' })
   }
 
-  /** Установка параметров продавца в карточке */
-  ['QOCardData - init seller']() {
-    const qodata = new QOData({ api: 'qcos.ru/api', seller: 'stest', name: 'test', price: '100' })
-    const qocarddata = new QOCardData(qodata.stringify())
+  /** Создание карточки заказа - свойства по умолчанию */
+  ['QOCardData - init defaults']() {
+    const qocarddata = new QOCardData()
+
+    assert.equal(qocarddata.api, null)
+    assert.equal(qocarddata.seller, null)
+    assert.equal(qocarddata.valid, null)
+    assert.equal(qocarddata.error, null)
+    assert.deepEqual(qocarddata.raw, [])
+    assert.deepEqual(qocarddata.errors, [])
+  }
+
+  /** Создание карточки заказа из простого объекта (QODataRaw) */
+  ['QOCardData - init from object']() {
+    const qocarddata = new QOCardData({ api: 'qcos.ru/api', seller: 'stest', name: 'test', price: '100' })
+
+    assert.equal(qocarddata.api, 'qcos.ru/api')
+    assert.equal(qocarddata.seller, 'stest')
+    assert.equal(qocarddata.valid, true)
+    assert.deepEqual(qocarddata.raw, [{ name: 'test', price: '100', number: 1 }])
+  }
+
+  /** Создание карточки заказа из массива товаров, с дополнением данными продавца  */
+  ['QOCardData - init from array']() {
+    const qocarddata = new QOCardData([{ name: 'test', price: '100' }])
+
+    assert.equal(qocarddata.api, null)
+    assert.equal(qocarddata.seller, null)
+    assert.equal(qocarddata.valid, null)
+    assert.deepEqual(qocarddata.raw, [{ name: 'test', price: '100', number: 1 }])
+
+    qocarddata.update({ api: 'qcos.ru/api', seller: 'stest' })
 
     assert.equal(qocarddata.api, 'qcos.ru/api')
     assert.equal(qocarddata.seller, 'stest')
     assert.equal(qocarddata.valid, true)
   }
 
+  /** Установка параметров продавца в карточке */
+  ['QOCardData - init seller']() {
+    const qodata = new QOData({ api: 'qcos.ru/api', seller: 'stest', name: 'test', price: '100' })
+    const qocarddata = new QOCardData(qodata)
+
+    assert.equal(qocarddata.api, 'qcos.ru/api')
+    assert.equal(qocarddata.seller, 'stest')
+    assert.equal(qocarddata.valid, true)
+    assert.deepEqual(qocarddata.raw, [{ name: 'test', price: '100', number: 1 }])
+  }
+
   /** Невалидная карточка без продавца */
   ['QOCardData - init without seller']() {
     const qodata = new QOData({ name: 'test', price: '100' })
-    const qocarddata = new QOCardData(qodata.stringify())
+    const qocarddata = new QOCardData(qodata)
 
-    assert.equal(qocarddata.api, undefined)
-    assert.equal(qocarddata.seller, undefined)
+    assert.equal(qocarddata.api, null)
+    assert.equal(qocarddata.seller, null)
     assert.equal(qocarddata.valid, false)
     assert.equal(qocarddata.error.message, 'Не переданы данные продавца')
     assert.equal(qocarddata.errors[0].message, 'Не переданы данные продавца')
   }
 
+  /** Невалидная карточка без продавца */
+  ['QOCardData - init by url']() {
+    const qocarddata = new QOCardData('qcos.ru/api/')
+
+    assert.equal(qocarddata.api, 'qcos.ru/api/')
+    assert.equal(qocarddata.seller, null)
+    assert.equal(qocarddata.valid, true)
+  }
+
   /** Добавление товара в карточку */
   ['QOCardData - add']() {
-    const qodata = new QOData({ api: 'qcos.ru/api', seller: 'stest', name: 'test', price: '100' })
-    const qocarddata = new QOCardData(qodata.stringify())
+    const qodata = new QOData({ api: 'qcos.ru/api', seller: 'stest' })
+    const qocarddata = new QOCardData(qodata)
 
-    qocarddata.add(qodata)
+    qocarddata.add({ name: 'test', price: '100' })
     assert.equal(qocarddata.valid, true)
     qocarddata.add({ api: 'qcos.ru/api' })
     assert.equal(qocarddata.valid, false)
@@ -358,18 +406,13 @@ export default class TestQOSource extends Test {
     assert.equal(qocarddata.errors[0].message, 'Не переданы данные товара')
   }
 
-  /** Запись товара из данных в конструкторе */
-  ['QOCardData - init, card instanceof Array']() {
-    const qodata = new QOData({ api: 'qcos.ru/api', id: 'id_1223' })
-    const qocarddata = new QOCardData(qodata, [qodata])
-
-    assert.deepEqual(qocarddata.raw, [{ id: 'id_1223', number: 1 }])
-  }
-
   /** Формирование урла заказа с товарами в виде ID */
   ['QOCardData - stringify with ids']() {
     const qodata = new QOData({ api: 'qcos.ru/api', id: 'id_1223' })
-    const qocarddata = new QOCardData(qodata, [qodata, { id: 1, number: 2 }])
+    const qocarddata = new QOCardData(qodata)
+
+    qocarddata.add({ id: 1, number: 2 })
+
     const url = qocarddata.stringify()
 
     assert.equal(url, 'https://qcos.ru/qcos.ru/api?id_1223=1&1=2')
@@ -378,7 +421,10 @@ export default class TestQOSource extends Test {
   /** Формирование урла заказа с товарами в виде сложных ID и количества */
   ['QOCardData - stringify with complex ids and number']() {
     const qodata = new QOData({ api: 'qcos.ru/api', id: 'тест', number: '5шт.' })
-    const qocarddata = new QOCardData(qodata, [qodata, { id: 'id_1223', number: 2 }])
+    const qocarddata = new QOCardData(qodata)
+
+    qocarddata.add({ id: 'id_1223', number: 2 })
+
     const url = qocarddata.stringify()
 
     assert.equal(url, 'https://qcos.ru/qcos.ru/api?id_1223=2&yWVmOANhIBaWS7hxWYn6yQRaeAFVFrB9Gkl0cteb7hurZ9hGoM.1')

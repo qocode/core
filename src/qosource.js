@@ -242,37 +242,24 @@ class QOData {
 class QOCardData {
 
   /**
-   * @typedef QOCardDataRawItem
-   * @property {string} [id]
-   * @property {string} [name]
-   * @property {string} [price]
-   * @property {number} [number]
+   * @typedef {Array<QODataRaw>} QOCardDataRaw
    */
   /**
-   * @typedef {Array<QOCardDataRawItem>} QOCardDataRaw
+   * @param {URL|URLSearchParams|QOData|QOCardDataRaw} card
    */
-  /**
-   * @param {URL|URLSearchParams|FormData|QOData} data
-   * @param {URL|URLSearchParams|QOCardDataRaw} card
-   */
-  constructor(data, card) {
-    const qodata = data instanceof QOData ? data : new QOData(data)
-
-    /** @type {string} */
-    this.api = qodata.raw.api
-    /** @type {string} */
-    this.seller = qodata.raw.seller
+  constructor(card) {
+    /** @type {QOCardDataRaw} */
+    this.raw = []
+    /** @type {string|null} */
+    this.api = null
+    /** @type {string|null} */
+    this.seller = null
     /** @type {Boolean} */
-    this.valid = !!this.api
+    this.valid = null
     /** @type {Error|null} */
     this.error = null
     /** @type {Array<Error>} */
     this.errors = []
-
-    if (!this.valid) {
-      this.error = new Error('Не переданы данные продавца')
-      this.errors.push(this.error)
-    }
 
     this.update(card)
   }
@@ -281,22 +268,24 @@ class QOCardData {
    * Обновление позиций заказа из url адреса или списка товаров.
    * Очищает ранее добавленные записи.
    *
-   * @param {URL|URLSearchParams|QOCardDataRaw} card
+   * @param {URL|URLSearchParams|QOData|QOCardDataRaw} card
    */
   update(card) {
-    /** @type {QOCardDataRaw} */
-    this.raw = []
     try {
-      if (typeof data === 'string') {
-        QOCardData.applyURLSearchParams(this.raw, new URL(card).searchParams)
+      if (typeof card === 'string') {
+        this.applyURL(new URL(card, location.origin))
+      } else if (card instanceof QOData) {
+        this.applyQOData(card)
       } else if (card instanceof URL) {
-        QOCardData.applyURLSearchParams(this.raw, card.searchParams)
+        this.applyURL(card)
       } else if (card instanceof URLSearchParams) {
-        QOCardData.applyURLSearchParams(this.raw, card)
+        this.applyURLSearchParams(card)
       } else if (card instanceof Array) {
         for (const item of card) {
           this.add(item)
         }
+      } else if (card instanceof Object) {
+        this.applyQOData(new QOData(card))
       }
     } catch (error) {
       this.valid = false
@@ -306,9 +295,53 @@ class QOCardData {
   }
 
   /**
+   * Обновление сведений карточки их экземпляра класса с данными о товаре
+   *
+   * @param {QOData} qodata
+   */
+  applyQOData(qodata) {
+    if (qodata.seller) {
+      this.api = qodata.raw.api
+      this.seller = qodata.raw.seller
+    }
+    if (!this.api) {
+      this.valid = false
+      this.error = new Error('Не переданы данные продавца')
+      this.errors.push(this.error)
+    } else if (!this.error) {
+      this.valid = true
+    }
+    if (qodata.product) {
+      this.raw = []
+      this.add(qodata)
+    }
+  }
+
+  /**
+   *
+   * @param {URL} card
+   */
+  applyURL(card) {
+    this.api = card.host + card.pathname
+    if (this.api && !this.error) {
+      this.valid = true
+    }
+    this.applyURLSearchParams(card.searchParams)
+  }
+
+  /**
+   * Обновляет данные о покупках из параметров запроса URL
+   *
+   * @param {URLSearchParams} card
+   */
+  applyURLSearchParams(card) {
+
+  }
+
+  /**
    * Добавление позиции в данные заказа
    *
-   * @param {QOData|QOCardDataRawItem} data
+   * @param {QOData} data
    */
   add(data) {
     const qodata = data instanceof QOData ? data : new QOData(data)
