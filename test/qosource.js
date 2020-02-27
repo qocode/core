@@ -338,7 +338,7 @@ export default class TestQOSource extends Test {
   ['QOCardData - init from object']() {
     const qocarddata = new QOCardData({ api: 'qcos.ru/api', seller: 'stest', name: 'test', price: '100' })
 
-    assert.equal(qocarddata.api, 'qcos.ru/api')
+    assert.equal(qocarddata.api, 'https://qcos.ru/api')
     assert.equal(qocarddata.seller, 'stest')
     assert.equal(qocarddata.valid, true)
     assert.deepEqual(qocarddata.raw, [{ name: 'test', price: '100', number: 1 }])
@@ -355,7 +355,7 @@ export default class TestQOSource extends Test {
 
     qocarddata.update({ api: 'qcos.ru/api', seller: 'stest' })
 
-    assert.equal(qocarddata.api, 'qcos.ru/api')
+    assert.equal(qocarddata.api, 'https://qcos.ru/api')
     assert.equal(qocarddata.seller, 'stest')
     assert.equal(qocarddata.valid, true)
   }
@@ -365,7 +365,7 @@ export default class TestQOSource extends Test {
     const qodata = new QOData({ api: 'qcos.ru/api', seller: 'stest', name: 'test', price: '100' })
     const qocarddata = new QOCardData(qodata)
 
-    assert.equal(qocarddata.api, 'qcos.ru/api')
+    assert.equal(qocarddata.api, 'https://qcos.ru/api')
     assert.equal(qocarddata.seller, 'stest')
     assert.equal(qocarddata.valid, true)
     assert.deepEqual(qocarddata.raw, [{ name: 'test', price: '100', number: 1 }])
@@ -378,18 +378,84 @@ export default class TestQOSource extends Test {
 
     assert.equal(qocarddata.api, null)
     assert.equal(qocarddata.seller, null)
-    assert.equal(qocarddata.valid, false)
-    assert.equal(qocarddata.error.message, 'Не переданы данные продавца')
-    assert.equal(qocarddata.errors[0].message, 'Не переданы данные продавца')
+    assert.equal(qocarddata.valid, null)
+    assert.equal(qocarddata.error, null)
+    assert.equal(qocarddata.errors.length, 0)
   }
 
-  /** Невалидная карточка без продавца */
-  ['QOCardData - init by url']() {
-    const qocarddata = new QOCardData('qcos.ru/api/')
+  /** Формирование точки отправки заказов относительно текущего сайта */
+  ['QOCardData - resolveURL']() {
+    const url1 = QOCardData.resolveURL('http://qcos.ru/api/')
+    const url2 = QOCardData.resolveURL('qcos1.ru/api2#asd')
+    const url3 = QOCardData.resolveURL('/api3/?asd')
 
-    assert.equal(qocarddata.api, 'qcos.ru/api/')
+    assert.equal(url1.href, 'http://qcos.ru/api/')
+    assert.equal(url2.href, 'https://qcos1.ru/api2#asd')
+    assert.equal(url3.href, 'https://qcos.ru/api3/?asd')
+  }
+
+  /** Восстановление карточки заказа по url */
+  ['QOCardData - init by url']() {
+    const { URL } = window
+    const qocarddata1 = new QOCardData('qcos.ru/api1/')
+    const qocarddata2 = new QOCardData(new URL('https://qcos.ru/api2/?name=2'))
+
+    assert.equal(qocarddata1.api, 'https://qcos.ru/api1/')
+    assert.equal(qocarddata1.seller, null)
+    assert.equal(qocarddata1.valid, true)
+    assert.deepEqual(qocarddata1.raw, [])
+
+    assert.equal(qocarddata2.api, 'https://qcos.ru/api2/')
+    assert.equal(qocarddata2.seller, null)
+    assert.equal(qocarddata2.valid, true)
+    assert.deepEqual(qocarddata2.raw, [{ id: 'name', number: '2' }])
+  }
+
+  /** Очистка списка товаров при обновлении из url */
+  ['QOCardData - update by url']() {
+    const { URL } = window
+    const qocarddata = new QOCardData(new URL('https://qcos.ru/api/?name=2'))
+
+    assert.equal(qocarddata.api, 'https://qcos.ru/api/')
     assert.equal(qocarddata.seller, null)
     assert.equal(qocarddata.valid, true)
+    assert.deepEqual(qocarddata.raw, [{ id: 'name', number: '2' }])
+
+    qocarddata.applyURL('qcos.ru/api1/')
+    assert.equal(qocarddata.api, 'https://qcos.ru/api1/')
+    assert.equal(qocarddata.seller, null)
+    assert.equal(qocarddata.valid, true)
+    assert.deepEqual(qocarddata.raw, [])
+  }
+
+  /** Попытка восстановление карточки заказа по невалидному url */
+  ['QOCardData - init by bad url']() {
+    const qocarddata = new QOCardData('https:qcos.ru/api/?id=1')
+
+    assert.equal(qocarddata.api, null)
+    assert.equal(qocarddata.seller, null)
+    assert.equal(qocarddata.valid, false)
+    assert.deepEqual(qocarddata.raw, [])
+    assert.ok(qocarddata.error, qocarddata.errors[0])
+    assert.equal(qocarddata.error.message, 'Invalid URL: https://https:qcos.ru/api/?id=1')
+  }
+
+  /** Создание карточки заказа оп URLSearchParams c доп. указанием продавца */
+  ['QOCardData - init by URLSearchParams']() {
+    const { URL } = window
+    const qocarddata = new QOCardData(new URL('https://qcos.ru/api/?name=2&=').searchParams)
+
+    assert.equal(qocarddata.api, null)
+    assert.equal(qocarddata.seller, null)
+    assert.equal(qocarddata.valid, null)
+    assert.deepEqual(qocarddata.raw, [{ id: 'name', number: '2' }])
+
+    qocarddata.update({ a: 'qcos1.ru/api2/' })
+
+    assert.equal(qocarddata.api, 'https://qcos1.ru/api2/')
+    assert.equal(qocarddata.seller, null)
+    assert.equal(qocarddata.valid, true)
+    assert.deepEqual(qocarddata.raw, [{ id: 'name', number: '2' }])
   }
 
   /** Добавление товара в карточку */
@@ -415,7 +481,7 @@ export default class TestQOSource extends Test {
 
     const url = qocarddata.stringify()
 
-    assert.equal(url, 'https://qcos.ru/qcos.ru/api?id_1223=1&1=2')
+    assert.equal(url, 'https://qcos.ru/api?id_1223=1&1=2')
   }
 
   /** Формирование урла заказа с товарами в виде сложных ID и количества */
@@ -427,7 +493,16 @@ export default class TestQOSource extends Test {
 
     const url = qocarddata.stringify()
 
-    assert.equal(url, 'https://qcos.ru/qcos.ru/api?id_1223=2&yWVmOANhIBaWS7hxWYn6yQRaeAFVFrB9Gkl0cteb7hurZ9hGoM.1')
+    assert.equal(url, 'https://qcos.ru/api?id_1223=2&yWVmOANhIBaWS7hxWYn6yQRaeAFVFrB9Gkl0cteb7hurZ9hGoM.1')
+  }
+
+  /** Восстановление карточки заказа по сжатому url */
+  ['QOCardData - restore by compressed url']() {
+    const qocarddata1 = new QOCardData('https://qcos.ru/api?id_1223=2&yWVmOANhIBaWS7hxWYn6yQRaeAFVFrB9Gkl0cteb7hurZ9hGoM.1')
+
+    assert.equal(qocarddata1.api, 'https://qcos.ru/api')
+    assert.equal(qocarddata1.valid, true)
+    assert.deepEqual(qocarddata1.raw, [{ id: 'id_1223', number: '2' }, { id: 'тест', number: '5шт.' }])
   }
 
 }

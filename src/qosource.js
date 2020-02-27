@@ -265,7 +265,7 @@ class QOCardData {
   }
 
   /**
-   * Обновление позиций заказа из url адреса или списка товаров.
+   * Обновление карточки заказа из url адреса или списка товаров.
    * Очищает ранее добавленные записи.
    *
    * @param {URL|URLSearchParams|QOData|QOCardDataRaw} card
@@ -273,7 +273,7 @@ class QOCardData {
   update(card) {
     try {
       if (typeof card === 'string') {
-        this.applyURL(new URL(card, location.origin))
+        this.applyURL(QOCardData.resolveURL(card))
       } else if (card instanceof QOData) {
         this.applyQOData(card)
       } else if (card instanceof URL) {
@@ -295,20 +295,16 @@ class QOCardData {
   }
 
   /**
-   * Обновление сведений карточки их экземпляра класса с данными о товаре
+   * Обновление карточки заказа из экземпляра класса с данными о товаре
    *
    * @param {QOData} qodata
    */
   applyQOData(qodata) {
     if (qodata.seller) {
-      this.api = qodata.raw.api
-      this.seller = qodata.raw.seller
-    }
-    if (!this.api) {
-      this.valid = false
-      this.error = new Error('Не переданы данные продавца')
-      this.errors.push(this.error)
-    } else if (!this.error) {
+      const url = QOCardData.resolveURL(qodata.raw.api)
+
+      this.api = url.origin + url.pathname
+      this.seller = qodata.raw.seller || null
       this.valid = true
     }
     if (qodata.product) {
@@ -318,24 +314,36 @@ class QOCardData {
   }
 
   /**
+   * Обновление карточки заказа из url
    *
-   * @param {URL} card
+   * @param {URL} rawURL
    */
-  applyURL(card) {
-    this.api = card.host + card.pathname
-    if (this.api && !this.error) {
-      this.valid = true
-    }
-    this.applyURLSearchParams(card.searchParams)
+  applyURL(rawURL) {
+    const url = rawURL instanceof URL ? rawURL : QOCardData.resolveURL(rawURL)
+
+    this.api = url.origin + url.pathname
+    this.valid = true
+    this.applyURLSearchParams(url.searchParams)
   }
 
   /**
-   * Обновляет данные о покупках из параметров запроса URL
+   * Обновление данных о покупках в карточке из параметров запроса URL
    *
-   * @param {URLSearchParams} card
+   * @param {URLSearchParams} searchParams
    */
-  applyURLSearchParams(card) {
+  applyURLSearchParams(searchParams) {
+    this.raw = []
+    for (const [key, value] of searchParams.entries()) {
+      if (key && !value) {
+        const json = inflateJSONURL(key)
 
+        for (const item of json) {
+          this.add(item)
+        }
+      } else if (key && value) {
+        this.add({ id: key, number: value })
+      }
+    }
   }
 
   /**
@@ -365,7 +373,7 @@ class QOCardData {
    * @returns {String}
    */
   stringify() {
-    const result = new URL(this.api, location.origin)
+    const result = new URL(this.api)
     const search = result.searchParams
     const deflateData = []
 
@@ -383,6 +391,27 @@ class QOCardData {
     }
 
     return result.href
+  }
+
+  /**
+   * Преобразует строку с указанием API сервиса по приёму заказов в формат URL.
+   * Адрес формируется относительно текущего сайта, без учета пути.
+   *
+   * @param {string} url
+   * @returns {URL}
+   */
+  static resolveURL(url) {
+    let result
+
+    if ((/^\w+:\/\//).test(url)) {
+      result = new URL(url)
+    } else if ((/^\//).test(url)) {
+      result = new URL(url, location.origin)
+    } else {
+      result = new URL(`${location.protocol}//${url}`)
+    }
+
+    return result
   }
 
 }
