@@ -1,0 +1,39 @@
+{
+  "extends": "@nodutilus/eslint-config",
+  "env": {
+    "browser": true,
+    "node": false
+  },
+  "overrides": [
+    {
+      "files": [
+        "./nyc.config.cjs"
+      ],
+      "env": {
+        "node": true
+      }
+    },
+    {
+      "files": [
+        "./test/**"
+      ],
+      "env": {
+        "browser": true,
+        "node": true
+      }
+    },
+    {
+      "files": [
+        "./webtest/index.js"
+      ],
+      "env": {
+        "browser": false,
+        "node": true
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "api.js",
+    "build/"
+  ]
+}

@@ -1,4 +1,2 @@
-import * as ext from './external.js'
-
-
-console.log(ext)
+export * from './external.js'
+export * from './qosource.js'
