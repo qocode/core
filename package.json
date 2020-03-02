@@ -14,8 +14,8 @@
   "browser": "./api.js",
   "exports": {
     ".": "./src/api.js",
-    "external": "./src/external.js",
-    "qosource": "./src/qosource.js"
+    "./external": "./src/external.js",
+    "./qosource": "./src/qosource.js"
   },
   "dependencies": {
     "@zxing/library": "^0.15.2",
