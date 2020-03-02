@@ -11,7 +11,12 @@
     "build/external.js",
     "build/qosource.js"
   ],
-  "main": "api.js",
+  "browser": "./api.js",
+  "exports": {
+    ".": "./src/api.js",
+    "external": "./src/external.js",
+    "qosource": "./src/qosource.js"
+  },
   "dependencies": {
     "@zxing/library": "^0.15.2",
     "pako": "^1.0.11",
