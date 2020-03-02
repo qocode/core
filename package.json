@@ -35,6 +35,6 @@
   },
   "scripts": {
     "build": "npx rollup --config",
-    "prepack": "npx rollup --config"
+    "prepublishOnly": "npx rollup --config"
   }
 }
