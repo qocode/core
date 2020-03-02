@@ -13,9 +13,9 @@
   ],
   "browser": "./api.js",
   "exports": {
-    ".": "./src/api.js",
-    "./external": "./src/external.js",
-    "./qosource": "./src/qosource.js"
+    ".": "./api.js",
+    "./external": "./build/external.js",
+    "./qosource": "./build/qosource.js"
   },
   "dependencies": {
     "@zxing/library": "^0.15.2",
@@ -41,6 +41,6 @@
   },
   "scripts": {
     "build": "npx rollup --config",
-    "prepublishOnly": "npx rollup --config"
+    "prepack": "npx rollup --config"
   }
 }
