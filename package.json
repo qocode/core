@@ -6,6 +6,7 @@
   "repository": "github:qocode/qocode",
   "type": "module",
   "files": [
+    "src",
     "api.js",
     "build/external.js",
     "build/qosource.js"
