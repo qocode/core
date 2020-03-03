@@ -4,7 +4,7 @@ const x64alphabet = '0123456789' +
   '-_'
 const partDelimiter = '.'
 const x64len = x64alphabet.length
-const x64RE = new RegExp(`^[${x64alphabet.replace('-', '\\-') + partDelimiter}]+$`)
+const urlValidCharsRE = new RegExp(`^[${x64alphabet.replace('-', '\\-') + partDelimiter}/]+$`)
 
 
 /**
@@ -112,8 +112,24 @@ function decodeURLx64(x64text) {
  * @param {string} text
  * @returns {boolean}
  */
-function testURLx64(text) {
-  return x64RE.test(String(text))
+function testURLChars(text) {
+  const result = urlValidCharsRE.test(String(text))
+
+  return result
+}
+
+
+/**
+ * Декодирует спецсимволы внутри параметров поиска в url,
+ *  которые корректно воспринимаются при получении данных из URLSearchParams
+ *
+ * @param {string} url
+ * @returns {string}
+ */
+function decodeURISearch(url) {
+  const result = url.replace(/%2F/g, '/')
+
+  return result
 }
 
 
@@ -125,5 +141,6 @@ export {
   intToX64Pos2,
   encodeURLx64,
   decodeURLx64,
-  testURLx64
+  testURLChars,
+  decodeURISearch
 }

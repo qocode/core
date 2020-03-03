@@ -1,5 +1,5 @@
 import { pako } from './pako.js'
-import { encodeURLx64, decodeURLx64, testURLx64 } from './lib/x64url.js'
+import { encodeURLx64, decodeURLx64, testURLChars, decodeURISearch } from './lib/x64url.js'
 
 const { location, URL, URLSearchParams, HTMLFormElement, FormData } = window
 
@@ -149,7 +149,7 @@ class QOData {
     const deflateData = {}
 
     for (const [key, value] of Object.entries(this.raw)) {
-      if (this.deflate === false || (this.deflate !== true && testURLx64(key + value))) {
+      if (this.deflate === false || (this.deflate !== true && testURLChars(key + value))) {
         search.set(QOData.propsMapShort[key] || key, value)
       } else {
         deflateData[QOData.propsMapShort[key] || key] = value
@@ -158,10 +158,10 @@ class QOData {
     if (Object.keys(deflateData).length) {
       search.set(deflateJSONURL(deflateData), '')
 
-      return result.href.replace(/=$/, '')
+      return decodeURISearch(result.href).replace(/=$/, '')
     }
 
-    return result.href
+    return decodeURISearch(result.href)
   }
 
   /**
@@ -378,7 +378,7 @@ class QOCardData {
     const deflateData = []
 
     for (const item of this.raw) {
-      if ('id' in item && testURLx64('' + item.id + item.number)) {
+      if ('id' in item && testURLChars('' + item.id + item.number)) {
         search.set(item.id, item.number)
       } else {
         deflateData.push(item)
@@ -387,10 +387,10 @@ class QOCardData {
     if (deflateData.length) {
       search.set(deflateJSONURL(deflateData), '')
 
-      return result.href.replace(/=$/, '')
+      return decodeURISearch(result.href).replace(/=$/, '')
     }
 
-    return result.href
+    return decodeURISearch(result.href)
   }
 
   /**

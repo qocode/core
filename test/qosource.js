@@ -5,7 +5,7 @@ import {
 } from '../src/qosource.js'
 import {
   intToX16Pos2, intToX16Pos3, intToX64, x64ToInt,
-  intToX64Pos2, encodeURLx64, decodeURLx64, testURLx64
+  intToX64Pos2, encodeURLx64, decodeURLx64, testURLChars, decodeURISearch
 } from '../src/lib/x64url.js'
 
 /** Тесты источника данных заказа */
@@ -77,20 +77,40 @@ export default class TestQOSource extends Test {
   }
 
   /** Проверяет что строка содержит только разрешенные для URL символы */
-  ['x64url - testURLx64']() {
-    assert.equal(testURLx64('Привет'), false)
-    assert.equal(testURLx64('QabgJt61Qo.2'), true)
-    assert.equal(testURLx64('____'), true)
-    assert.equal(testURLx64('0gYg.ff'), true)
-    assert.equal(testURLx64('0gYg.1'), true)
+  ['x64url - testURLChars']() {
+    assert.equal(testURLChars('Привет'), false)
+    assert.equal(testURLChars('QabgJt61Qo.2'), true)
+    assert.equal(testURLChars('____'), true)
+    assert.equal(testURLChars('0gYg.ff'), true)
+    assert.equal(testURLChars('0gYg.1'), true)
+    assert.equal(testURLChars('qcos.ru/test/api'), true)
 
     const x64alphabet = '0123456789' +
       'abcdefghijklmnopqrstuvwxyz' +
       'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
       '-_.'
 
-    assert.equal(testURLx64(x64alphabet), true)
+    assert.equal(testURLChars(x64alphabet), true)
   }
+
+  /** Проверка преобразования параметров поиска в url */
+  ['x64url - decodeURISearch']() {
+    const { URL } = window
+    const url1 = new URL('http://qcos.ru/')
+    const url2 = new URL('http://qcos.ru/')
+
+    url1.searchParams.set('a', 'qcos.ru/api/')
+    url2.searchParams.set('a', 'qcos.ru/апи#?!/')
+
+    const url1Result = decodeURISearch(url1.href)
+    const url2Result = decodeURISearch(url2.href)
+    const eURI = encodeURI(decodeURIComponent(url2Result))
+
+    assert.equal(url1Result, 'http://qcos.ru/?a=qcos.ru/api/')
+    assert.equal(url2Result, 'http://qcos.ru/?a=qcos.ru/%D0%B0%D0%BF%D0%B8%23%3F%21/')
+    assert.equal(eURI, 'http://qcos.ru/?a=qcos.ru/%D0%B0%D0%BF%D0%B8#?!/')
+  }
+
 
   /** Проверка сжатия параметров URL */
   ['qosource - deflateJSONURL']() {
@@ -100,7 +120,7 @@ export default class TestQOSource extends Test {
 
     const test = deflateJSONURL({ name: 'ПриветПриветПриветПривет' })
 
-    assert.equal(testURLx64(test), true)
+    assert.equal(testURLChars(test), true)
 
     const { URL, location } = window
     const url = new URL('/', location.href)
@@ -276,11 +296,11 @@ export default class TestQOSource extends Test {
 
   /** Получение ссылки на товар со сжатыми данными */
   ['QOData - stringify deflate']() {
-    const qodata1 = new QOData({ api: 'qcos.ru/api', name: 'тест', price: '100р.', ext: 'тест' })
+    const qodata1 = new QOData({ api: 'qcos.ru/api/', name: 'тест', price: '100р.', ext: 'тест' })
     const url = qodata1.stringify()
     const qodata2 = new QOData(url)
 
-    assert.equal(url, 'https://qcos.ru/?GRpalb9iaAPebZoHaJlfbcxkQB7a0UFsrbGMZmbzNiowJM38djgMKdyw1-iAlFgwOZo2')
+    assert.equal(url, 'https://qcos.ru/?a=qcos.ru/api/&GRrakX9iKJxQouL5NEJdizFa1k2KEo71NgoZ82uREwhpJxo0')
     assert.deepEqual(qodata2.raw, qodata1.raw)
   }
 
