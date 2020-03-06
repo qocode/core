@@ -8,11 +8,14 @@ import {
   intToX64Pos2, encodeURLx64, decodeURLx64, testURLChars, decodeURISearch
 } from '../src/lib/x64url.js'
 
-/** Тесты источника данных заказа */
-export default class TestQOSource extends Test {
+
+/**
+ * Проверка работы со сжатием URL и допустимыми символами URL
+ */
+class Tx64url extends Test {
 
   /** Приведение к числу с основанием 16, максимум 2 знака, 0-255 */
-  ['x64url - intToX16Pos2']() {
+  ['intToX16Pos2']() {
     assert.equal(intToX16Pos2(1), '01')
     assert.equal(intToX16Pos2(15), '0f')
     assert.equal(intToX16Pos2(16), '10')
@@ -20,7 +23,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Приведение к числу с основанием 16, максимум 3 знака, 0-4095 */
-  ['x64url - intToX16Pos3']() {
+  ['intToX16Pos3']() {
     assert.equal(intToX16Pos3(1), '001')
     assert.equal(intToX16Pos3(15), '00f')
     assert.equal(intToX16Pos3(16), '010')
@@ -29,21 +32,21 @@ export default class TestQOSource extends Test {
   }
 
   /** Приведение к числу с основанием 64 */
-  ['x64url - intToX64']() {
+  ['intToX64']() {
     assert.equal(intToX64(1), '1')
     assert.equal(intToX64(63), '_')
     assert.equal(intToX64(64), '10')
   }
 
   /** Восстановление числа с основанием 64 в 10 */
-  ['x64url - x64ToInt']() {
+  ['x64ToInt']() {
     assert.equal(x64ToInt('1'), 1)
     assert.equal(x64ToInt('_'), 63)
     assert.equal(x64ToInt('10'), 64)
   }
 
   /** Приведение к числу с основанием 64, максимум 2 знака, 0-4095 */
-  ['x64url - intToX64Pos2']() {
+  ['intToX64Pos2']() {
     assert.equal(intToX64Pos2(1), '01')
     assert.equal(intToX64Pos2(15), '0f')
     assert.equal(intToX64Pos2(16), '0g')
@@ -53,7 +56,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Проеобразуем 8-битный массив в строку */
-  ['x64url - encodeURLx64']() {
+  ['encodeURLx64']() {
     const encoder = new TextEncoder()
 
     assert.equal(encodeURLx64(encoder.encode('Тест')), 'QabgJt61Qo.2')
@@ -65,7 +68,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Проеобразуем строку в 8-битный массив */
-  ['x64url - decodeURLx64']() {
+  ['decodeURLx64']() {
     const decoder = new TextDecoder()
 
     assert.equal(decoder.decode(decodeURLx64('QabgJt61Qo.2')), 'Тест')
@@ -77,7 +80,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Проверяет что строка содержит только разрешенные для URL символы */
-  ['x64url - testURLChars']() {
+  ['testURLChars']() {
     assert.equal(testURLChars('Привет'), false)
     assert.equal(testURLChars('QabgJt61Qo.2'), true)
     assert.equal(testURLChars('____'), true)
@@ -94,7 +97,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Проверка преобразования параметров поиска в url */
-  ['x64url - decodeURISearch']() {
+  ['decodeURISearch']() {
     const { URL } = window
     const url1 = new URL('http://qcos.ru/')
     const url2 = new URL('http://qcos.ru/')
@@ -111,9 +114,16 @@ export default class TestQOSource extends Test {
     assert.equal(eURI, 'http://qcos.ru/?a=qcos.ru/%D0%B0%D0%BF%D0%B8#?!/')
   }
 
+}
+
+
+/**
+ * Базовые методы обработки данных источника заказа
+ */
+class Tqosource extends Test {
 
   /** Проверка сжатия параметров URL */
-  ['qosource - deflateJSONURL']() {
+  ['deflateJSONURL']() {
     assert.equal(deflateJSONURL({ name: 'Привет' }), 'GRraiYNdlr9iKz3_oIe57hsSntxWIkCF5w')
     assert.equal(deflateJSONURL({ api: 'qcos.ru', name: 'Привет' }),
       'GRpabcxkIB8GjcULRyIGlt9hOALcjgkan9x_Iu72zwKrbCOZSahk2M')
@@ -130,7 +140,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Проверка распаковки параметров URL */
-  ['qosource - inflateJSONURL']() {
+  ['inflateJSONURL']() {
     assert.deepEqual(inflateJSONURL('GRraiYNdlr9iKz3_oIe57hsSntxWIkCF5w'), { name: 'Привет' })
     assert.deepEqual(inflateJSONURL('GRpabcxkIB8GjcULRyIGlt9hOALcjgkan9x_Iu72zwKrbCOZSahk2M'),
       { api: 'qcos.ru', name: 'Привет' })
@@ -147,8 +157,16 @@ export default class TestQOSource extends Test {
     assert.deepEqual(inflateJSONURL(deflateJSONURL(json)), json)
   }
 
+}
+
+
+/**
+ * Данные заказа в виде URL
+ */
+class TQOData extends Test {
+
   /** Проверка опций по умолчанию для QOData */
-  ['QOData - init options']() {
+  ['init options']() {
     const qodata1 = new QOData()
     const qodata2 = new QOData(null, { url: 'http://qcos.ru' })
     const qodata3 = new QOData(null, { host: 'example.com' })
@@ -169,8 +187,8 @@ export default class TestQOSource extends Test {
     assert.equal(qodata6.baseURL.href, 'https://example.com/test/api/')
   }
 
-  /** QOData - парсинг данных из url и searchParams в формате deflate-json и объекта */
-  ['QOData - parse string url']() {
+  /** Парсинг данных из url и searchParams в формате deflate-json и объекта */
+  ['parse string url']() {
     const { URL } = window
     const param1 = deflateJSONURL({ api: 'qcos.ru' })
     const param2 = deflateJSONURL({ price: 100 })
@@ -192,8 +210,8 @@ export default class TestQOSource extends Test {
     assert.deepEqual(qodata.raw, { api: 'qcos1.ru', name: 'title1', price: 1000 })
   }
 
-  /** QOData - парсинг данных из FormData */
-  ['QOData - parse form']() {
+  /** Парсинг данных из FormData */
+  ['parse form']() {
     const { document, FormData } = window
     const form = document.createElement('form')
     const qodata = new QOData()
@@ -212,7 +230,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Проверка перехвата ошибок парсинга входных данных */
-  ['QOData - parse errors']() {
+  ['parse errors']() {
     const qodata = new QOData()
 
     assert.equal(qodata.error, null)
@@ -247,7 +265,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Проверка корректности формата данных для заказа */
-  ['QOData - validate']() {
+  ['validate']() {
     let qodata = new QOData()
 
     assert.deepEqual([qodata.valid, qodata.seller, qodata.product], [false, false, false])
@@ -274,7 +292,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Запись полей: встроенные, краткие, кастомные, невалидные */
-  ['QOData - setRawFields']() {
+  ['setRawFields']() {
     const raw = {}
 
     QOData.setRawFields(raw, [
@@ -285,7 +303,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Получение ссылки на товар c простыми параметрами поиска */
-  ['QOData - stringify simple']() {
+  ['stringify simple']() {
     const qodata1 = new QOData({ api: 'qcos.ru', name: 'test', price: '100', ext: 'test' })
     const url = qodata1.stringify()
     const qodata2 = new QOData(url)
@@ -295,7 +313,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Получение ссылки на товар со сжатыми данными */
-  ['QOData - stringify deflate']() {
+  ['stringify deflate']() {
     const qodata1 = new QOData({ api: 'qcos.ru/api/', name: 'тест', price: '100р.', ext: 'тест' })
     const url = qodata1.stringify()
     const qodata2 = new QOData(url)
@@ -305,7 +323,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Получение ссылки на товар c простыми и сжатыми данными */
-  ['QOData - stringify simple+deflate']() {
+  ['stringify simple+deflate']() {
     const qodata1 = new QOData({ api: 'qcos.ru', name: 'тест', price: '100р.', ext: 'test' })
     const url = qodata1.stringify()
     const qodata2 = new QOData(url)
@@ -315,7 +333,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Получение ссылки на товар без сжатия данных */
-  ['QOData - stringify deflate=false']() {
+  ['stringify deflate=false']() {
     const qodata1 = new QOData({ name: 'тест', price: '100р.' }, { deflate: false })
     const url = qodata1.stringify()
     const qodata2 = new QOData(url)
@@ -326,7 +344,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Получение ссылки на товар всегда со сжатием данных */
-  ['QOData - stringify deflate=true']() {
+  ['stringify deflate=true']() {
     const qodata1 = new QOData({ name: 'name', price: '100' }, { deflate: true })
     const url = qodata1.stringify()
     const qodata2 = new QOData(url)
@@ -336,14 +354,22 @@ export default class TestQOSource extends Test {
   }
 
   /** Получение данных товара без данных продавца */
-  ['QOData - productData']() {
+  ['productData']() {
     const qodata = new QOData({ api: 'qcos.ru/api', seller: 'stest', name: 'test', price: '100' })
 
     assert.deepEqual(qodata.productData, { name: 'test', price: '100' })
   }
 
+}
+
+
+/**
+ * Данные для оформления заказа
+ */
+class TQOCardData extends Test {
+
   /** Создание карточки заказа - свойства по умолчанию */
-  ['QOCardData - init defaults']() {
+  ['init defaults']() {
     const qocarddata = new QOCardData()
 
     assert.equal(qocarddata.api, null)
@@ -355,7 +381,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Создание карточки заказа из простого объекта (QODataRaw) */
-  ['QOCardData - init from object']() {
+  ['init from object']() {
     const qocarddata = new QOCardData({ api: 'qcos.ru/api', seller: 'stest', name: 'test', price: '100' })
 
     assert.equal(qocarddata.api, 'https://qcos.ru/api')
@@ -365,7 +391,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Создание карточки заказа из массива товаров, с дополнением данными продавца  */
-  ['QOCardData - init from array']() {
+  ['init from array']() {
     const qocarddata = new QOCardData([{ name: 'test', price: '100' }])
 
     assert.equal(qocarddata.api, null)
@@ -381,7 +407,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Установка параметров продавца в карточке */
-  ['QOCardData - init seller']() {
+  ['init seller']() {
     const qodata = new QOData({ api: 'qcos.ru/api', seller: 'stest', name: 'test', price: '100' })
     const qocarddata = new QOCardData(qodata)
 
@@ -392,7 +418,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Невалидная карточка без продавца */
-  ['QOCardData - init without seller']() {
+  ['init without seller']() {
     const qodata = new QOData({ name: 'test', price: '100' })
     const qocarddata = new QOCardData(qodata)
 
@@ -404,7 +430,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Формирование точки отправки заказов относительно текущего сайта */
-  ['QOCardData - resolveURL']() {
+  ['resolveURL']() {
     const url1 = QOCardData.resolveURL('http://qcos.ru/api/')
     const url2 = QOCardData.resolveURL('qcos1.ru/api2#asd')
     const url3 = QOCardData.resolveURL('/api3/?asd')
@@ -415,7 +441,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Восстановление карточки заказа по url */
-  ['QOCardData - init by url']() {
+  ['init by url']() {
     const { URL } = window
     const qocarddata1 = new QOCardData('qcos.ru/api1/')
     const qocarddata2 = new QOCardData(new URL('https://qcos.ru/api2/?name=2'))
@@ -432,7 +458,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Очистка списка товаров при обновлении из url */
-  ['QOCardData - update by url']() {
+  ['update by url']() {
     const { URL } = window
     const qocarddata = new QOCardData(new URL('https://qcos.ru/api/?name=2'))
 
@@ -449,7 +475,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Попытка восстановление карточки заказа по невалидному url */
-  ['QOCardData - init by bad url']() {
+  ['init by bad url']() {
     const qocarddata = new QOCardData('https:qcos.ru/api/?id=1')
 
     assert.equal(qocarddata.api, null)
@@ -461,7 +487,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Создание карточки заказа оп URLSearchParams c доп. указанием продавца */
-  ['QOCardData - init by URLSearchParams']() {
+  ['init by URLSearchParams']() {
     const { URL } = window
     const qocarddata = new QOCardData(new URL('https://qcos.ru/api/?name=2&=').searchParams)
 
@@ -479,7 +505,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Добавление товара в карточку */
-  ['QOCardData - add']() {
+  ['add']() {
     const qodata = new QOData({ api: 'qcos.ru/api', seller: 'stest' })
     const qocarddata = new QOCardData(qodata)
 
@@ -493,7 +519,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Формирование урла заказа с товарами в виде ID */
-  ['QOCardData - stringify with ids']() {
+  ['stringify with ids']() {
     const qodata = new QOData({ api: 'qcos.ru/api', id: 'id_1223' })
     const qocarddata = new QOCardData(qodata)
 
@@ -505,7 +531,7 @@ export default class TestQOSource extends Test {
   }
 
   /** Формирование урла заказа с товарами в виде сложных ID и количества */
-  ['QOCardData - stringify with complex ids and number']() {
+  ['stringify with complex ids and number']() {
     const qodata = new QOData({ api: 'qcos.ru/api', id: 'тест', number: '5шт.' })
     const qocarddata = new QOCardData(qodata)
 
@@ -517,12 +543,22 @@ export default class TestQOSource extends Test {
   }
 
   /** Восстановление карточки заказа по сжатому url */
-  ['QOCardData - restore by compressed url']() {
+  ['restore by compressed url']() {
     const qocarddata1 = new QOCardData('https://qcos.ru/api?id_1223=2&yWVmOANhIBaWS7hxWYn6yQRaeAFVFrB9Gkl0cteb7hurZ9hGoM.1')
 
     assert.equal(qocarddata1.api, 'https://qcos.ru/api')
     assert.equal(qocarddata1.valid, true)
     assert.deepEqual(qocarddata1.raw, [{ id: 'id_1223', number: '2' }, { id: 'тест', number: '5шт.' }])
   }
+
+}
+
+/** Тесты источника данных заказа */
+export default class TestQOSource extends Test {
+
+  static x64url = Tx64url
+  static qosource = Tqosource
+  static QOData = TQOData
+  static QOCardData = TQOCardData
 
 }
