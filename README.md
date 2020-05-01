@@ -1,11 +1,11 @@
-# Quick Order Code - API [![npm][npmbadge]][npm] [![build][badge]][actions]
+# Quick Order Code - Core [![npm][npmbadge]][npm] [![build][badge]][actions]
 
-Публичное API для системы быстрого оформления заказов
+Базовое API для системы быстрого оформления заказов
 
-[npmbadge]: https://img.shields.io/npm/v/qocode
+[npmbadge]: https://img.shields.io/npm/v/@qocode/core
 
-[npm]: https://www.npmjs.com/package/qocode
+[npm]: https://www.npmjs.com/package/@qocode/core
 
-[badge]: https://github.com/qocode/qocode/workflows/Checks%20%26%20Publish/badge.svg
+[badge]: https://github.com/qocode/core/workflows/Checks%20%26%20Publish/badge.svg
 
-[actions]: https://github.com/qocode/qocode/actions
+[actions]: https://github.com/qocode/core/actions

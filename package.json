@@ -1,18 +1,21 @@
 {
-  "name": "qocode",
+  "name": "@qocode/core",
   "version": "0.2.0",
-  "description": "Quick Order Code",
+  "description": "Quick Order Code - Core",
   "license": "Unlicense",
-  "repository": "github:qocode/qocode",
+  "repository": "github:qocode/core",
   "type": "module",
+  "engines": {
+    "node": ">=14"
+  },
   "files": [
-    "api.js",
+    "core.js",
     "build/external.js",
     "build/qosource.js"
   ],
-  "browser": "./api.js",
+  "browser": "./core.js",
   "exports": {
-    ".": "./api.js",
+    ".": "./core.js",
     "./external": "./build/external.js",
     "./qosource": "./build/qosource.js"
   },
@@ -41,5 +44,8 @@
   "scripts": {
     "build": "npx rollup --config",
     "prepack": "npx rollup --config"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

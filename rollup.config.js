@@ -15,8 +15,8 @@ export default [{
     terser()
   ]
 }, {
-  input: 'src/pako.js',
-  output: { file: 'build/tmp/pako.js', format: 'esm', compact: true },
+  input: 'src/lib/pako.js',
+  output: { file: 'build/tmp/lib/pako.js', format: 'esm', compact: true },
   plugins: [
     resolve({ browser: true, preferBuiltins: false }),
     commonjs({ include: 'node_modules/**' }),
@@ -25,7 +25,7 @@ export default [{
   ]
 }, {
   input: 'src/qosource.js',
-  external: ['./pako.js'],
+  external: ['./lib/pako.js'],
   output: { file: 'build/tmp/qosource.js', format: 'esm' },
   plugins: [babel({ plugins: ['@babel/plugin-proposal-class-properties'] })]
 }, {
@@ -33,8 +33,8 @@ export default [{
   output: { file: 'build/qosource.js', format: 'esm' },
   plugins: [cleanup({ comments: 'none' })]
 }, {
-  input: 'src/api.js',
-  output: { file: 'api.js', format: 'esm' },
+  input: 'src/core.js',
+  output: { file: 'core.js', format: 'esm' },
   plugins: [alias({
     entries: [
       { find: './external.js', replacement: '../build/external.js' },

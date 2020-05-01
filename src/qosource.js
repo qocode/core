@@ -1,4 +1,4 @@
-import { pako } from './pako.js'
+import { pako } from './lib/pako.js'
 import { encodeURLx64, decodeURLx64, testURLChars, decodeURISearch } from './lib/x64url.js'
 
 const { location, URL, URLSearchParams, HTMLFormElement, FormData } = window
