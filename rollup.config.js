@@ -1,7 +1,6 @@
 import alias from '@rollup/plugin-alias'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
-import babel from 'rollup-plugin-babel'
 import cleanup from 'rollup-plugin-cleanup'
 import { terser } from 'rollup-plugin-terser'
 
@@ -26,8 +25,7 @@ export default [{
 }, {
   input: 'src/qosource.js',
   external: ['./lib/pako.js'],
-  output: { file: 'build/tmp/qosource.js', format: 'esm' },
-  plugins: [babel({ plugins: ['@babel/plugin-proposal-class-properties'] })]
+  output: { file: 'build/tmp/qosource.js', format: 'esm' }
 }, {
   input: 'build/tmp/qosource.js',
   output: { file: 'build/qosource.js', format: 'esm' },
